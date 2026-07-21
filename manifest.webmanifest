@@ -1,0 +1,15 @@
+{
+  "name": "GTO Trainer — Tournament Poker",
+  "short_name": "GTO Trainer",
+  "description": "Tournament poker GTO trainer with built-in preflop and postflop solvers",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1319",
+  "theme_color": "#0f1319",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

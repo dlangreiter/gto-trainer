@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f1319">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>GTO Trainer — Tournament Poker</title>
+  <link rel="stylesheet" href="css/styles.css?v=14">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♠</text></svg>">
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>♠ GTO <span class="accent">Trainer</span></h1>
+      <div class="header-stats" id="headerStats"></div>
+      <div class="header-btns">
+        <button class="btn" id="btnReview" style="display:none;border-color:var(--red);color:var(--red)">Review</button>
+        <a class="btn" id="btnGuide" href="guide.html" style="text-decoration:none">📖 Guide</a>
+        <button class="btn" id="btnStats">Stats</button>
+        <button class="btn" id="btnRanges">Ranges</button>
+        <button class="btn" id="btnSettings">Settings</button>
+      </div>
+    </header>
+
+    <div class="section-tabs" id="sectionTabs"></div>
+
+    <div class="exam-progress" id="examProgress" style="display:none">
+      <span id="examProgLabel"></span>
+      <div class="exam-prog-bar"><div class="fill" id="examProgFill"></div></div>
+    </div>
+
+    <div class="table-wrap" id="tableWrap">
+      <div class="table-felt"></div>
+      <div class="table-center" id="tableCenter"></div>
+      <div id="seats"></div>
+      <div class="hero-cards" id="heroCards"></div>
+      <div class="solve-overlay" id="solveOverlay">
+        <div class="msg" id="solveMsg">Solving Nash equilibrium…</div>
+        <div class="progress-bar"><div class="fill" id="solveFill"></div></div>
+      </div>
+    </div>
+
+    <div class="controls" id="controls"></div>
+
+    <div class="builder-panel" id="builderPanel" style="display:none"></div>
+
+    <!-- Spot explorer: build any preflop spot, browse the acting player's chart -->
+    <div class="explore-panel" id="explorePanel" style="display:none">
+      <h2>🔍 Spot explorer</h2>
+      <div class="hint" style="margin:4px 0 10px">Set up the table, then click each player's action in order —
+        the chart below always shows the solver's full strategy for the player whose turn it is.</div>
+      <div class="x-sub" id="xSub"></div>
+      <div class="x-config" id="xConfig"></div>
+      <div class="x-seats" id="xSeats"></div>
+      <div class="x-title" id="xTitle"></div>
+      <div class="range-grid" id="xGrid"></div>
+      <div class="range-legend"><span id="xLegend"></span><span class="range-stats" id="xStats"></span></div>
+      <div class="hint" id="xNote" style="margin-top:8px"></div>
+    </div>
+
+    <div class="feedback" id="feedback">
+      <div class="verdict" id="fbVerdict"></div>
+      <div class="detail" id="fbDetail"></div>
+      <div class="fb-btns">
+        <button class="btn" id="btnShowRange">View solver range</button>
+        <button class="btn primary" id="btnNext">Next hand <kbd>Space</kbd></button>
+      </div>
+    </div>
+
+    <div class="quick-bar" id="quickBar"></div>
+
+    <div class="history" id="history"></div>
+    <div class="hist-detail" id="histDetail" style="display:none"></div>
+  </div>
+
+  <!-- Settings modal -->
+  <div class="modal-backdrop" id="settingsModal">
+    <div class="modal">
+      <h2>Table setup</h2>
+      <div class="row">
+        <label>Players</label>
+        <select id="setPlayers">
+          <option>2</option><option>3</option><option>4</option><option>5</option>
+          <option>6</option><option>7</option><option>8</option><option selected>9</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>Blinds (chips)</label>
+        <span style="white-space:nowrap">SB <input type="number" id="setSB" value="500" min="1" style="width:80px"></span>
+        <span style="white-space:nowrap">BB <input type="number" id="setBB" value="1000" min="1" style="width:80px"></span>
+      </div>
+      <div class="row">
+        <label>Ante</label>
+        <div class="seg" id="segAnte">
+          <button data-v="none">None</button>
+          <button data-v="bb" class="on">BB ante</button>
+          <button data-v="classic">Classic</button>
+        </div>
+        <input type="number" id="setAnte" value="1000" min="0" style="width:90px">
+      </div>
+      <div class="hint">BB ante: one ante posted by the big blind (enter total chips). Classic: every player antes (enter per-player chips).</div>
+      <div class="row">
+        <label>Stacks (chips)</label>
+        <input type="text" class="wide" id="setStacks" value="10000">
+      </div>
+      <div class="hint">One value for uniform stacks, or comma-separated per seat in acting order (UTG first, BB last). Example: 20000, 15000, 8000, …</div>
+      <div class="row">
+        <label>Hero position</label>
+        <select id="setHeroPos"><option value="random">Random</option></select>
+      </div>
+      <div class="row">
+        <label>Trainer mode</label>
+        <select id="setMode">
+          <option value="auto" selected>Auto (by stack depth)</option>
+          <option value="pushfold">Jam / Fold (solver)</option>
+          <option value="callvjam">Call vs Jam (solver)</option>
+          <option value="opentree">Open: raise/jam/fold (solver)</option>
+          <option value="vsopen">Reshove vs open (solver)</option>
+          <option value="vs3bet">Facing a 3-bet jam (solver)</option>
+          <option value="rfi">Opening ranges (charts)</option>
+          <option value="vsrfi">Facing a raise (charts)</option>
+          <option value="builder">Range builder quiz</option>
+          <option value="exam">Session exam (mixed spots, scored)</option>
+          <optgroup label="Postflop (heads-up SRP, 40bb)">
+            <option value="pfhand">Play a full hand (solver)</option>
+            <option value="pfcbet">C-bet flop (solver)</option>
+            <option value="pfdefend">Defend vs c-bet (solver)</option>
+            <option value="pftexture">Flop texture quiz</option>
+            <option value="pfequity">Equity estimate</option>
+            <option value="pfrivercall">River call vs jam</option>
+          </optgroup>
+        </select>
+      </div>
+      <div class="row" id="rowExam">
+        <label>Exam length</label>
+        <select id="setExamHands">
+          <option value="10">10 hands</option>
+          <option value="20" selected>20 hands</option>
+          <option value="30">30 hands</option>
+        </select>
+        <div class="seg" id="segExamCharts">
+          <button data-v="off" class="on">Solver only</button>
+          <button data-v="on">+ deep charts</button>
+        </div>
+      </div>
+      <div class="hint" id="hintExam">Exam: a run of preflop AND postflop spots — randomized table sizes, stack
+        depths, antes, positions, open sizes, plus c-bet/defend/river decisions from the postflop section. No
+        feedback until the end — then a score and a walkthrough of every mistake. Adaptive: drills and positions
+        you miss are dealt more often in your next exam. “+ deep charts” also mixes in 40–60 bb opening-range and
+        facing-a-raise chart spots.</div>
+      <div class="row">
+        <label>EV model</label>
+        <div class="seg" id="segFormat">
+          <button data-v="chip" class="on">Chip EV</button>
+          <button data-v="icm">ICM ($EV)</button>
+          <button data-v="pko">PKO</button>
+        </div>
+      </div>
+      <div class="row" id="rowPayouts">
+        <label>Payouts</label>
+        <input type="text" class="wide" id="setPayouts" value="50, 30, 20">
+      </div>
+      <div class="hint" id="hintPayouts">ICM: the solver maximizes tournament $ instead of chips (final tables, bubbles).
+        Enter remaining payouts, best first — % of prize pool or any currency. Applies to the solver modes.</div>
+      <div class="row" id="rowBounties">
+        <label>Bounties (bb value)</label>
+        <input type="text" id="setBounties" value="5" style="width:180px">
+        <span style="white-space:nowrap">capture <input type="number" id="setBountyFrac" value="0.65" min="0" max="1" step="0.05" style="width:70px"></span>
+      </div>
+      <div class="hint" id="hintBounties">PKO: busting a covered player earns their bounty. One value or per-seat CSV,
+        expressed in big blinds of value (bounty $ ÷ $ per bb). Capture = effective share you keep (~0.65).</div>
+      <div class="row">
+        <label>Solver accuracy</label>
+        <select id="setIters">
+          <option value="150">Fast (150 iterations)</option>
+          <option value="300" selected>Normal (300 iterations)</option>
+          <option value="600">High (600 iterations)</option>
+        </select>
+      </div>
+      <div class="modal-btns">
+        <button class="btn" id="btnResetStats">Reset stats</button>
+        <button class="btn primary" id="btnApplySettings">Apply</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Range viewer modal -->
+  <div class="modal-backdrop" id="rangeModal">
+    <div class="modal range-modal">
+      <h2 id="rangeTitle">Solver range</h2>
+      <div class="range-controls" id="rangeControls"></div>
+      <div class="range-grid" id="rangeGrid"></div>
+      <div class="range-legend">
+        <span id="legendItems"><span class="swatch" style="background:var(--jam)"></span><span id="legendAggr">Jam</span></span>
+        <span><span class="swatch" style="background:var(--fold-cell)"></span>Fold</span>
+        <span class="range-stats" id="rangeStats"></span>
+      </div>
+      <div class="modal-btns"><button class="btn primary" id="btnCloseRange">Close</button></div>
+    </div>
+  </div>
+
+  <!-- Exit-exam confirm modal -->
+  <div class="modal-backdrop" id="exitExamModal">
+    <div class="modal" style="max-width:380px">
+      <h2>Exit the exam?</h2>
+      <div class="hint" style="margin:0 0 12px">This run will be discarded — no score, no recap.
+        (Hands you already answered still count in your stats.) You'll return to free play.</div>
+      <div class="modal-btns">
+        <button class="btn" id="btnKeepExam">Keep playing</button>
+        <button class="btn" id="btnExitExam" style="border-color:var(--red);color:var(--red)">Exit exam</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exam results modal -->
+  <div class="modal-backdrop" id="examModal">
+    <div class="modal exam-modal">
+      <h2>Session exam — results</h2>
+      <div id="examBody"></div>
+      <div class="modal-btns">
+        <button class="btn" id="btnExamReview">Replay mistakes</button>
+        <button class="btn" id="btnExamAgain">New exam</button>
+        <button class="btn primary" id="btnCloseExam">Done</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats / leaks modal -->
+  <div class="modal-backdrop" id="statsModal">
+    <div class="modal">
+      <h2>Session stats &amp; leaks</h2>
+      <div id="statsBody"></div>
+      <div class="modal-btns"><button class="btn primary" id="btnCloseStats">Close</button></div>
+    </div>
+  </div>
+
+  <script src="data/equity169.js?v=14"></script>
+  <script src="js/constants.js?v=14"></script>
+  <script src="js/solver.js?v=14"></script>
+  <script src="js/ranges.js?v=14"></script>
+  <script src="js/deck.js?v=14"></script>
+  <script src="js/postflop.js?v=14"></script>
+  <script src="js/postflop-solver.js?v=14"></script>
+  <script src="js/main.js?v=14"></script>
+  <script>
+    // installable PWA + offline support (skipped on file://)
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      navigator.serviceWorker.register('sw.js').catch(() => {});
+    }
+  </script>
+</body>
+</html>

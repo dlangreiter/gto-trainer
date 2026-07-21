@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f1319">
+  <title>GTO Trainer — The Complete Guide</title>
+  <link rel="stylesheet" href="css/styles.css?v=14">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♠</text></svg>">
+  <style>
+    .guide { max-width: 860px; margin: 0 auto; padding: 12px 18px 80px; }
+    .guide h1 { font-size: 24px; margin: 10px 0 4px; }
+    .guide .sub { color: var(--text-dim); font-size: 14px; margin-bottom: 18px; }
+    .gsec {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin: 14px 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .gsec h2 { font-size: 18px; margin-bottom: 10px; }
+    .gsec h2 .num { color: var(--accent); margin-right: 8px; }
+    .gsec h3 { font-size: 14px; margin: 14px 0 6px; color: var(--text); }
+    .gsec p, .gsec li { font-size: 14px; line-height: 1.65; color: var(--text-dim); margin-bottom: 10px; }
+    .gsec p b, .gsec li b { color: var(--text); }
+    .gsec ul, .gsec ol { padding-left: 22px; margin-bottom: 10px; }
+    .gsec li { margin-bottom: 5px; }
+    .gimg { margin: 14px auto; text-align: center; }
+    .gimg svg { max-width: 100%; }
+    .gimg .cap { font-size: 12px; color: var(--text-dim); opacity: 0.85; margin-top: 6px; }
+    .tryit {
+      display: inline-block;
+      background: linear-gradient(180deg, #5ea6fa, #4590ef);
+      color: #08111f !important;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 9px;
+      text-decoration: none;
+      margin-top: 4px;
+    }
+    .tryit:hover { filter: brightness(1.08); }
+    .keybox {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text);
+      margin: 12px 0;
+      line-height: 1.6;
+    }
+    .toc { columns: 2; font-size: 13px; }
+    .toc a { color: var(--text-dim); text-decoration: none; display: block; padding: 2px 0; }
+    .toc a:hover { color: var(--accent); }
+    .mini-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 1px; max-width: 420px; margin: 0 auto; }
+    .mini-grid .range-cell { font-size: clamp(5px, 1.6vw, 8px); border-radius: 2px; }
+    .grids2 { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; }
+    .grids2 > div { flex: 1 1 300px; max-width: 420px; }
+    .grids2 .glabel { text-align: center; font-size: 12px; color: var(--text-dim); margin: 6px 0; }
+    .gcards { display: inline-flex; gap: 4px; vertical-align: middle; margin: 0 4px; }
+    .gcards .card { width: 30px; height: 42px; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.4); animation: none; }
+    .gcards .card .card-rank { font-size: 15px; }
+    .gcards .card .card-suit { font-size: 11px; }
+    .fboard { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; margin: 8px 0; font-size: 13px; color: var(--text-dim); }
+    @media (max-width: 700px) { .toc { columns: 1; } .gsec { padding: 16px 14px; } }
+  </style>
+</head>
+<body>
+<div class="guide">
+  <p style="margin-top:10px"><a href="index.html" class="btn" style="text-decoration:none">← Back to the trainer</a></p>
+  <h1>♠ The Complete GTO Tournament Guide</h1>
+  <p class="sub">Everything in this guide is numbered in learning order — start at 1 and work down. Every
+    section ends with a <b>Try it</b> button that drops you into the matching drill. The charts and equity
+    numbers on this page are rendered live from the same data and solver the trainer uses.</p>
+
+  <div class="gsec">
+    <h2>Contents</h2>
+    <div class="toc" id="toc"></div>
+  </div>
+
+  <div class="gsec" id="s1">
+    <h2><span class="num">1.</span>What "GTO" actually means</h2>
+    <p><b>Game Theory Optimal</b> play is a strategy that cannot be exploited: if you played it forever, no
+      opponent could adjust in any way that beats you. It is not the most profitable strategy against bad
+      players — against someone who calls too much you should simply bluff less and value-bet more — but it is
+      the <b>baseline</b>. You cannot deviate profitably from a baseline you don't know.</p>
+    <p>Two ideas underpin everything that follows:</p>
+    <ul>
+      <li><b>Ranges, not hands.</b> You never play "a hand" — you play every hand you could hold the same way
+        you would in that spot. The solver's answer is always a <i>frequency</i> for each of the 169 starting
+        hands: "jam 100%", "call 40%", "fold". Mixed frequencies exist to stay unexploitable.</li>
+      <li><b>EV (expected value)</b> is the average chips a decision earns over all outcomes. The trainer
+        grades you by <b>EV lost</b>: how many big blinds your choice gives up versus the best option. A
+        "mistake" that loses 0.05 bb is noise; one that loses 2 bb is a leak.</li>
+    </ul>
+    <div class="keybox">The goal of studying GTO is not to memorize charts — it's to internalize <b>why</b> the
+      ranges look the way they do, so you can reconstruct them at the table and know when (and how) to deviate
+      against real opponents.</div>
+  </div>
+
+  <div class="gsec" id="s2">
+    <h2><span class="num">2.</span>Positions and the table</h2>
+    <p>Position is the single biggest input to every preflop decision. Acting <b>later</b> means acting with
+      more information, so late positions play far more hands. At a 9-handed table the seats act in this
+      order before the flop:</p>
+    <div class="gimg"><svg id="posSvg" viewBox="0 0 460 240"></svg>
+      <div class="cap">Preflop action starts at UTG and ends with the Big Blind. The Button acts last on every
+        postflop street — the most valuable seat at the table.</div></div>
+    <ul>
+      <li><b>Early (UTG, UTG+1, UTG+2)</b> — eight players still to act behind you: open only strong hands.</li>
+      <li><b>Middle (LJ, HJ)</b> — ranges widen as fewer players remain.</li>
+      <li><b>Late (CO, BTN)</b> — the button opens roughly <i>four times</i> as many hands as UTG.</li>
+      <li><b>Blinds (SB, BB)</b> — forced bets. The BB closes the preflop action and gets a discount to defend;
+        the SB plays the whole game out of position.</li>
+    </ul>
+  </div>
+
+  <div class="gsec" id="s3">
+    <h2><span class="num">3.</span>Reading the 169-hand grid</h2>
+    <p>Every chart in poker uses the same 13×13 grid. <b>Pairs run down the diagonal</b>. Hands
+      <b>above</b> the diagonal are <b>suited</b> (both cards the same suit — they make flushes and play better),
+      hands <b>below</b> it are <b>offsuit</b>. "AKs" = ace-king suited (4 combos), "AKo" = offsuit (12 combos),
+      "AA" = 6 combos. There are 1,326 total two-card combos compressed into these 169 classes.</p>
+    <div class="gimg"><div class="mini-grid range-grid" id="gridLegend"></div>
+      <div class="cap">Diagonal = pairs · upper-right = suited · lower-left = offsuit.</div></div>
+    <p>When a chart shows a colored cell, the color's <i>height</i> is the frequency: a cell half-filled red
+      jams 50% of the time. Mixed strategies are normal — memorize the pure regions first, treat the mixes as
+      "either is fine".</p>
+  </div>
+
+  <div class="gsec" id="s4">
+    <h2><span class="num">4.</span>Opening ranges (RFI)</h2>
+    <p>"Raise first in" — nobody has entered the pot yet. The two grids below are the trainer's actual
+      baseline opening ranges. Notice how the button's range swallows the UTG range whole and adds every
+      suited ace, most suited connectors, and weak broadways:</p>
+    <div class="grids2">
+      <div><div class="glabel"><b>UTG opens</b> (~14% of hands)</div><div class="mini-grid range-grid" id="gridUTG"></div></div>
+      <div><div class="glabel"><b>BTN opens</b> (~44% of hands)</div><div class="mini-grid range-grid" id="gridBTN"></div></div>
+    </div>
+    <p>The logic: with 8 players behind, UTG's weak opens get punished by 3-bets and dominated postflop. On the
+      button only the blinds remain, you'll have position every street, and stealing 1.5 bb of blinds + antes
+      with a 2.2x raise needs to work barely more than half the time to profit outright.</p>
+    <p><a class="tryit" href="index.html?mode=rfi">Try it → Opening ranges drill</a>
+       <a class="tryit" href="index.html?mode=builder" style="margin-left:8px">Try it → Range builder quiz</a></p>
+  </div>
+
+  <div class="gsec" id="s5">
+    <h2><span class="num">5.</span>Defending against a raise: 3-bet, call, or fold</h2>
+    <p>Facing an open you have three options, and the right mix depends on <b>your position relative to the
+      opener</b> and the price you're getting:</p>
+    <ul>
+      <li><b>3-bet</b> a polarized-to-linear mix: your best hands for value, plus hands slightly too weak to
+        call that block their continues (A5s, K9s type hands).</li>
+      <li><b>Call</b> mostly in the BB (you already have 1 bb invested — you're getting a discount) and in
+        position with hands that flop well: pairs, suited broadways, suited connectors.</li>
+      <li><b>Fold</b> everything else. The single most common leak in real games is defending too many
+        dominated offsuit hands.</li>
+    </ul>
+    <p>The BB defends far wider than any other seat — closing the action at a discount, roughly 25–40% of hands
+      against late opens. The SB, out of position with no discount, mostly plays 3-bet-or-fold.</p>
+    <p><a class="tryit" href="index.html?mode=vsrfi">Try it → Facing a raise drill</a></p>
+  </div>
+
+  <div class="gsec" id="s6">
+    <h2><span class="num">6.</span>Pot odds and equity — the only math you must know</h2>
+    <p><b>Equity</b> is your share of the pot if all cards were dealt out now — your winning chances.
+      <b>Pot odds</b> tell you the equity you need for a call to break even:</p>
+    <div class="keybox">Required equity = <b>amount to call ÷ (pot after you call)</b>.<br>
+      Facing a 5 bb bet into a 10 bb pot: 5 ÷ (10 + 5 + 5) = <b>25%</b>. Your call only needs to win a quarter
+      of the time.</div>
+    <div class="gimg"><svg id="oddsSvg" viewBox="0 0 460 90"></svg>
+      <div class="cap">The bigger the bet relative to the pot, the more equity your call needs — but it never
+        reaches 50% because the pot subsidizes you.</div></div>
+    <p>Common landmarks worth memorizing: ⅓-pot bet → 20%, ½-pot → 25%, ¾-pot → 30%, pot-size → 33%,
+      2x pot → 40%. Every calling decision in this trainer — preflop all-ins and river jams alike — reduces to
+      "is my equity above the requirement?"</p>
+    <p><a class="tryit" href="index.html?mode=pfequity">Try it → Equity estimate drill</a></p>
+  </div>
+
+  <div class="gsec" id="s7">
+    <h2><span class="num">7.</span>Short stacks: push or fold</h2>
+    <p>Below roughly <b>15 bb</b>, raising small and folding to a shove burns too much of your stack, so the
+      solved strategy collapses to two actions: <b>all-in or fold</b>. Jamming works through two channels at
+      once — everyone folds and you win the blinds/antes uncontested, or you get called with decent equity.
+      That "fold equity" is why hands like K7s or A2o become clear jams at 8 bb even though they're behind most
+      calling ranges.</p>
+    <ul>
+      <li>Ranges <b>widen dramatically by position</b>: at 10 bb with an ante, UTG jams ~15% but the SB jams
+        over half of all hands.</li>
+      <li>Ranges <b>widen as stacks shrink</b>: the shorter you are, the more the blinds matter relative to
+        your stack — and the less you risk when called.</li>
+      <li>Known benchmark: heads-up at 10 bb the SB jams <b>~58%</b> of hands (the trainer's solver reproduces
+        this to within 0.1%).</li>
+    </ul>
+    <p><a class="tryit" href="index.html?mode=pushfold">Try it → Jam or Fold drill</a></p>
+  </div>
+
+  <div class="gsec" id="s8">
+    <h2><span class="num">8.</span>Calling all-ins</h2>
+    <p>Calling a jam is pure pot-odds math against the <b>jammer's range</b>, not their exact hand. A 10 bb
+      jam into 2.5 bb of blinds and antes offers you roughly 45% required equity — so you need hands that beat
+      the middle of their jamming range. Two asymmetries trip people up:</p>
+    <ul>
+      <li>Calling ranges are always <b>tighter</b> than jamming ranges — the jammer has fold equity, the caller
+        has none. Never mirror the jam range when calling.</li>
+      <li>The <b>wider</b> the jammer's range (late position, short stack), the wider you call. A5o is a snap
+        call against a SB 10bb jam and a clear fold against a UTG jam.</li>
+    </ul>
+    <p><a class="tryit" href="index.html?mode=callvjam">Try it → Call vs Jam drill</a></p>
+  </div>
+
+  <div class="gsec" id="s9">
+    <h2><span class="num">9.</span>Antes change everything</h2>
+    <p>Once antes are in play (usually from level 3 of a tournament), every pot starts with ~2.5 bb instead of
+      1.5 bb. The reward for winning preflop rises ~65% while the risk stays the same, so <b>every range
+      widens</b>: opens, jams, calls, defends. The trainer's solver shows UTG's 10 bb jam range growing from
+      ~10% without an ante to ~15% with one. If you play ante-less ranges in ante levels you are folding away
+      equity every orbit.</p>
+    <p><a class="tryit" href="index.html?mode=auto">Try it → set an ante level in the Blind level menu</a></p>
+  </div>
+
+  <div class="gsec" id="s10">
+    <h2><span class="num">10.</span>Mid stacks (15–30 bb): the raise tree</h2>
+    <p>Between 15 and 30 bb you have three first-in options: <b>fold</b>, <b>small raise</b> (2–2.5x), or
+      <b>jam</b>. The solved trees show a clear structure:</p>
+    <ul>
+      <li><b>Open small with almost everything you play.</b> Pure open-jams are rare above 15 bb — the small
+        raise wins the blinds nearly as often at a fraction of the risk, and keeps your options open.</li>
+      <li><b>Reshoving</b> is the counter: facing a 2.2x open with 15–25 bb, jamming denies the opener's equity
+        and gets called by a tight range. Reshove ranges are value + blockers (Ax suited shines).</li>
+      <li><b>Facing a reshove</b> after you open is pure pot-odds again: you're usually offered ~35–40%, so you
+        call with far more hands than feels natural. Open-folding AJo after a reshove is often a big mistake —
+        the trainer will show you the exact EV.</li>
+    </ul>
+    <p><a class="tryit" href="index.html?mode=opentree">Try it → Open strategy</a>
+       <a class="tryit" href="index.html?mode=vsopen" style="margin-left:8px">Try it → Reshove vs open</a>
+       <a class="tryit" href="index.html?mode=vs3bet" style="margin-left:8px">Try it → Facing a 3-bet jam</a></p>
+  </div>
+
+  <div class="gsec" id="s11">
+    <h2><span class="num">11.</span>ICM: chips are not money</h2>
+    <p>In a tournament, doubling your stack does <b>not</b> double your prize-money expectation — payouts flatten
+      the top. The <b>Independent Chip Model</b> converts stacks into tournament equity, and it changes solved
+      ranges in one systematic direction: <b>survival gains value</b>.</p>
+    <ul>
+      <li>On the <b>bubble</b>, a big stack can jam recklessly wide into medium stacks (they can't call without
+        risking their tournament), while calling ranges collapse — in the trainer's classic bubble example the
+        BTN's jam range jumps from 22% to 53% and the SB's calling range falls from 12% to <b>1.5%</b>.</li>
+      <li>Close to par (equal stacks, far from payouts) ICM barely matters. The deeper into the money, the
+        stronger the effect.</li>
+      <li>The practical rule: <b>jam wider when you cover, call tighter when calling risks your stack.</b></li>
+    </ul>
+    <p><a class="tryit" href="index.html?mode=pushfold">Try it → switch EV model to ICM in Settings</a></p>
+  </div>
+
+  <div class="gsec" id="s12">
+    <h2><span class="num">12.</span>PKO bounties</h2>
+    <p>In progressive-knockout tournaments, part of the prize pool sits on players' heads. A bounty is
+      <b>dead money you can only claim by covering and busting someone</b> — so it works like extra chips in
+      the pot that only you can win. Convert the bounty to big blinds (bounty $ ÷ $ per bb) and the effects
+      follow mechanically:</p>
+    <ul>
+      <li>Calling ranges vs shorter stacks <b>explode</b> — the trainer's property tests show a 5 bb jam that a
+        41% range calls normally becomes a <b>call with any two cards</b> when the jammer carries a big bounty.</li>
+      <li>Your own jams get called wider when <i>you're</i> short and bountied — tighten your bluff jams.</li>
+      <li>If you don't cover the player, their bounty changes nothing for you. Coverage is everything.</li>
+    </ul>
+    <p><a class="tryit" href="index.html?mode=callvjam">Try it → switch EV model to PKO in Settings</a></p>
+  </div>
+
+  <div class="gsec" id="s13">
+    <h2><span class="num">13.</span>Postflop I: equity, ranges, and MDF</h2>
+    <p>Postflop is the same game with more information: your preflop range meets a board. Three tools carry
+      most of the weight:</p>
+    <ul>
+      <li><b>Hand-vs-range equity.</b> Stop thinking "am I ahead?" and start thinking "what's my equity against
+        everything they can have?" Top pair might be 80% against a wide range and 35% against a tight one.</li>
+      <li><b>Range advantage.</b> Whichever player's range connects better with the board gets to bet more —
+        section 14.</li>
+      <li><b>Minimum Defense Frequency.</b> When you face a bet, MDF = <b>pot ÷ (pot + bet)</b> is the fraction
+        of your range you must continue with so that their pure bluffs can't print money. Vs a ⅓-pot bet defend
+        ~75%; vs a pot-size bet defend ~50%. Folding much more than MDF against frequent bettors is the most
+        exploitable postflop leak.</li>
+    </ul>
+    <p><a class="tryit" href="index.html?mode=pfequity">Try it → Equity estimate</a></p>
+  </div>
+
+  <div class="gsec" id="s14">
+    <h2><span class="num">14.</span>Postflop II: board textures and range advantage</h2>
+    <p>Live numbers, computed on this page by the same engine the trainer uses — BTN's opening range vs BB's
+      defending range on three different flops:</p>
+    <div class="fboard" id="texBoards">computing…</div>
+    <p>The pattern generalizes:</p>
+    <ul>
+      <li><b>High, dry boards (A72r, K83r)</b> favor the raiser — their range holds all the big pairs and big
+        aces. Expect frequent small c-bets with almost the whole range.</li>
+      <li><b>Low, connected boards (654, 765tt)</b> favor the caller — the BB defends every suited connector
+        and small pair that just smashed this flop. The raiser should check more and give up more.</li>
+      <li><b>Middling boards (T98, J76tt)</b> are contested — betting gets polar: strong hands and draws bet
+        bigger, the middle checks.</li>
+    </ul>
+    <p><a class="tryit" href="index.html?mode=pftexture">Try it → Flop texture quiz</a></p>
+  </div>
+
+  <div class="gsec" id="s15">
+    <h2><span class="num">15.</span>Postflop III: c-betting and defending</h2>
+    <p>The continuation bet is the most common postflop decision in poker. The solver's c-bet strategy follows
+      from range advantage plus your specific hand's needs:</p>
+    <ul>
+      <li><b>Small bets (⅓ pot)</b> on boards you dominate — a cheap attack the defender must respect with ~75%
+        of range (MDF), which is impossible on boards that missed them.</li>
+      <li><b>Big bets (¾ pot+)</b> when ranges are closer and you want to play polar: strong value + draws, and
+        the middle of your range checks.</li>
+      <li><b>Checking is not giving up</b> — medium-strength hands check to control the pot and bluff-catch.</li>
+      <li>Defending, raise the c-bet with your strongest hands <i>plus draws</i> — check-raising only value is
+        face-up and exploitable.</li>
+    </ul>
+    <p>After any c-bet or defend drill, hit <b>"View solver range"</b> to see the whole strategy grid for that
+      exact board — the fastest way to build intuition for how ranges split.</p>
+    <p><a class="tryit" href="index.html?mode=pfcbet">Try it → C-bet flop</a>
+       <a class="tryit" href="index.html?mode=pfdefend" style="margin-left:8px">Try it → Defend vs c-bet</a></p>
+  </div>
+
+  <div class="gsec" id="s16">
+    <h2><span class="num">16.</span>Postflop IV: turns, rivers, and polarization</h2>
+    <p>As streets progress, ranges narrow and betting turns <b>polar</b>: by the river, big bets represent
+      either strong value or a bluff — medium hands check or bluff-catch. Three river principles:</p>
+    <ul>
+      <li><b>Count the price, not your feelings.</b> A pot-size river jam needs you to win 33% of the time.
+        Against a range of "top 20% value + 12% bluffs", a mediocre bluff-catcher often clears that bar.</li>
+      <li><b>Value bets need calls from worse; bluffs need folds from better.</b> If neither is true, check.</li>
+      <li><b>Balanced barreling:</b> the solver keeps enough bluffs (usually busted draws with blockers) that
+        folding everything but the nuts loses; the trainer's river-call drill trains exactly this judgment.</li>
+    </ul>
+    <p>The <b>Full hand</b> mode plays entire flop→turn→river sequences against the solver, with the villain's
+      range updating after every action — the closest thing to sitting across from a GTO opponent.</p>
+    <p><a class="tryit" href="index.html?mode=pfhand">Try it → Play a full hand</a>
+       <a class="tryit" href="index.html?mode=pfrivercall" style="margin-left:8px">Try it → River call vs jam</a></p>
+  </div>
+
+  <div class="gsec" id="s17">
+    <h2><span class="num">17.</span>How to study with this trainer</h2>
+    <p>A routine that works (20–30 minutes a day beats 4 hours on Sunday):</p>
+    <ol>
+      <li><b>Warm up (5 min):</b> one blind level from the level menu in Auto mode — the drill follows the depth.</li>
+      <li><b>Focus block (10 min):</b> the drill your Stats page marks weakest (the ▼ arrows and the 🎯 rotation
+        list tell you where). Missed hands are automatically re-dealt until you clear them twice.</li>
+      <li><b>Exam (10 min):</b> one 20-hand Session Exam. No feedback until the end forces real decisions; the
+        recap explains every mistake, and the next exam automatically leans toward what you missed.</li>
+      <li><b>Review (5 min):</b> the red Review button replays your actual mistakes — preflop and postflop —
+        until you get each one right.</li>
+    </ol>
+    <div class="keybox">Progression: sections 1–8 until short-stack play is automatic → 9–12 for tournament
+      dynamics → 13–16 postflop. Re-read a section after drilling it; the explanations land differently once
+      you've been graded on the spots.</div>
+    <p><a class="tryit" href="index.html?mode=exam">Start an exam →</a></p>
+  </div>
+
+  <p style="text-align:center;margin-top:24px"><a href="index.html" class="btn" style="text-decoration:none">← Back to the trainer</a></p>
+</div>
+
+<script src="js/constants.js?v=14"></script>
+<script src="js/ranges.js?v=14"></script>
+<script src="js/postflop.js?v=14"></script>
+<script>
+(function () {
+  const GTO = globalThis.GTO;
+  const Ranges = globalThis.GTORanges;
+  const PF = globalThis.GTOPostflop;
+  const $ = (id) => document.getElementById(id);
+
+  // table of contents
+  const secs = Array.from(document.querySelectorAll('.gsec[id]'));
+  $('toc').innerHTML = secs.map(s =>
+    `<a href="#${s.id}">${s.querySelector('h2').textContent}</a>`).join('');
+
+  // position diagram
+  (function posDiagram() {
+    const names = GTO.POSITION_NAMES[9];
+    const cx = 230, cy = 118, rx = 185, ry = 88;
+    let out = `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#1e5c3f" stroke="#3d2b1f" stroke-width="8"/>`;
+    const groups = { 'UTG': '#f87171', 'UTG+1': '#f87171', 'UTG+2': '#f87171', 'LJ': '#fbbf24', 'HJ': '#fbbf24', 'CO': '#34d399', 'BTN': '#34d399', 'SB': '#4f9cf9', 'BB': '#4f9cf9' };
+    names.forEach((nm, i) => {
+      const th = Math.PI / 2 + 2 * Math.PI * ((i - 6 + 9) % 9) / 9; // BTN at bottom-ish
+      const x = cx + (rx - 4) * Math.cos(th), y = cy + (ry - 2) * Math.sin(th);
+      out += `<rect x="${x - 26}" y="${y - 12}" width="52" height="24" rx="7" fill="#0c1118" stroke="${groups[nm]}"/>` +
+        `<text x="${x}" y="${y + 4}" font-size="11" font-weight="700" fill="${groups[nm]}" text-anchor="middle">${nm}</text>` +
+        `<text x="${x}" y="${y - 16}" font-size="9" fill="#94a3b8" text-anchor="middle">${i + 1}</text>`;
+    });
+    out += `<text x="${cx}" y="${cy - 6}" font-size="11" fill="#9fd6bb" text-anchor="middle">acts 1st → 9th</text>` +
+      `<text x="${cx}" y="${cy + 12}" font-size="10" fill="#7ea896" text-anchor="middle">early · middle · late · blinds</text>`;
+    $('posSvg').innerHTML = out;
+  })();
+
+  // grid rendering helpers
+  function renderGrid(el, freqs, colorFor) {
+    let cells = '';
+    for (let id = 0; id < 169; id++) {
+      const f = freqs ? freqs[id] : 0;
+      const label = GTO.handLabel(id);
+      let style = '';
+      if (freqs) {
+        const pct = Math.round(f * 100);
+        if (f >= 0.995) style = 'background:var(--jam);color:#fff';
+        else if (f > 0.005) style = `background:linear-gradient(to top, var(--jam) ${pct}%, var(--fold-cell) ${pct}%);color:#dfe6ef`;
+      } else {
+        style = colorFor(id);
+      }
+      cells += `<div class="range-cell" style="${style}" title="${label}${freqs ? ': ' + Math.round(f * 100) + '%' : ''}">${label}</div>`;
+    }
+    el.innerHTML = cells;
+  }
+
+  // legend grid: pairs / suited / offsuit regions
+  renderGrid($('gridLegend'), null, (id) => {
+    const a = Math.floor(id / 13), b = id % 13;
+    if (a === b) return 'background:#4f9cf9;color:#08111f';
+    if (a < b) return 'background:#2f6e4f;color:#dfe6ef';
+    return 'background:#5a4632;color:#dfe6ef';
+  });
+
+  renderGrid($('gridUTG'), Ranges.RFI.UTG);
+  renderGrid($('gridBTN'), Ranges.RFI.BTN);
+
+  // pot-odds bar chart
+  (function odds() {
+    const sizes = [['⅓ pot', 0.33], ['½ pot', 0.5], ['¾ pot', 0.75], ['pot', 1], ['2x pot', 2]];
+    let out = '';
+    sizes.forEach(([nm, s], i) => {
+      const need = s / (1 + 2 * s);
+      const x = 20 + i * 88;
+      const bh = need * 180;
+      out += `<rect x="${x}" y="${70 - bh / 2.6}" width="56" height="${bh / 2.6}" rx="3" fill="#4f9cf9" opacity="0.85"/>` +
+        `<text x="${x + 28}" y="${62 - bh / 2.6}" font-size="11" fill="#e8edf4" text-anchor="middle" font-weight="700">${(need * 100).toFixed(0)}%</text>` +
+        `<text x="${x + 28}" y="84" font-size="10" fill="#94a3b8" text-anchor="middle">${nm}</text>`;
+    });
+    $('oddsSvg').innerHTML = out;
+  })();
+
+  // live texture equities
+  (function textures() {
+    const RANKS = '23456789TJQKA', SUITS = 'shdc';
+    const C = (s) => (RANKS.indexOf(s[0]) << 2) | SUITS.indexOf(s[1]);
+    const btn = PF.rangeCombos(Ranges.RFI.BTN, []);
+    const bb = PF.rangeCombos(Ranges.VSRFI.BB_vs_BTN.call, []);
+    const boards = [
+      ['A♠7♦2♣', ['As', '7d', '2c']],
+      ['T♠9♠8♦', ['Ts', '9s', '8d']],
+      ['6♠5♦4♣', ['6s', '5d', '4c']],
+    ];
+    const parts = boards.map(([nm, cards]) => {
+      const eq = PF.rangeVsRange(btn, bb, cards.map(C), 25000, 9);
+      const who = eq > 0.52 ? 'raiser' : eq < 0.48 ? 'caller' : 'even';
+      const col = eq > 0.52 ? '#d97a2b' : eq < 0.48 ? '#34d399' : '#94a3b8';
+      return `<span><b>${nm}</b> — BTN ${(eq * 100).toFixed(1)}% <span style="color:${col}">(${who})</span></span>`;
+    });
+    $('texBoards').innerHTML = parts.join(' &nbsp;·&nbsp; ');
+  })();
+})();
+</script>
+</body>
+</html>
