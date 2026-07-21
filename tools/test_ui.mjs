@@ -764,6 +764,37 @@ await page.waitForFunction(
   { timeout: 120000 });
 check('guide deep link starts the drill',
   /C-bet flop/i.test(await page.$eval('#tableCenter', el => el.textContent)));
+
+// --- the advanced guide ---
+check('header has an Advanced link',
+  await page.$eval('#btnAdvanced', el => /advanced\.html/.test(el.href)));
+await page.goto('http://127.0.0.1:8080/advanced.html', { waitUntil: 'networkidle0' });
+await page.waitForFunction(() =>
+  document.querySelectorAll('#varTable tr').length > 3 &&
+  document.querySelectorAll('#turnTable tr').length > 3, { timeout: 120000 });
+check('advanced guide has 12 numbered sections',
+  await page.$$eval('.gsec[id]', els => els.length) === 12);
+check('advanced: blocker demo computed',
+  /combos/.test(await page.$eval('#blockerDemo', el => el.textContent)));
+check('advanced: polar + condensed grids render',
+  await page.$$eval('#gridPolar .range-cell', els => els.length) === 169 &&
+  await page.$$eval('#gridCondensed .range-cell', els => els.length) === 169);
+check('advanced: live ICM bubble matrix',
+  /needs/.test(await page.$eval('#bubbleMatrix', el => el.textContent)) &&
+  /premium/.test(await page.$eval('#bubbleMatrix', el => el.textContent)));
+check('advanced: multiway equity dilution table',
+  /AA/.test(await page.$eval('#mwTable', el => el.textContent)));
+check('advanced: turn equity shifts computed',
+  /barrel wide|slow down|mixed/.test(await page.$eval('#turnTable', el => el.textContent)));
+check('advanced: geometric sizing computed',
+  /geometric size/.test(await page.$eval('#geoDemo', el => el.textContent)));
+check('advanced: variance simulation ran',
+  /DOWN after 500/.test(await page.$eval('#varTable', el => el.textContent)));
+check('advanced: pro benchmarks present',
+  await page.$$eval('.probox', els => els.length) === 12);
+await page.goto('http://127.0.0.1:8080/index.html', { waitUntil: 'networkidle0' });
+await page.waitForFunction(() => document.querySelectorAll('#controls button').length >= 2 ||
+  document.getElementById('solveOverlay').classList.contains('show'), { timeout: 60000 });
 // restore for future runs
 await applySettings(async () => {
   await page.select('#setMode', 'auto');

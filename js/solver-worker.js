@@ -1,5 +1,5 @@
 // Web Worker: runs the push/fold solver off the main thread.
-importScripts('../data/equity169.js?v=16', 'constants.js?v=16', 'solver.js?v=16');
+importScripts('../data/equity169.js?v=17', 'constants.js?v=17', 'solver.js?v=17');
 
 self.onmessage = function (e) {
   const cfg = e.data;

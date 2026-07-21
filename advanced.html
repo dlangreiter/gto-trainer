@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f1319">
+  <title>GTO Trainer — The Advanced Guide</title>
+  <link rel="stylesheet" href="css/styles.css?v=17">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♠</text></svg>">
+  <style>
+    .guide { max-width: 860px; margin: 0 auto; padding: 12px 18px 80px; }
+    .guide h1 { font-size: 24px; margin: 10px 0 4px; }
+    .guide .sub { color: var(--text-dim); font-size: 14px; margin-bottom: 18px; }
+    .gsec {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      margin: 14px 0;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .gsec h2 { font-size: 18px; margin-bottom: 10px; }
+    .gsec h2 .num { color: #d97a2b; margin-right: 8px; }
+    .gsec h3 { font-size: 14px; margin: 14px 0 6px; color: var(--text); }
+    .gsec p, .gsec li { font-size: 14px; line-height: 1.65; color: var(--text-dim); margin-bottom: 10px; }
+    .gsec p b, .gsec li b { color: var(--text); }
+    .gsec ul, .gsec ol { padding-left: 22px; margin-bottom: 10px; }
+    .gsec li { margin-bottom: 5px; }
+    .tryit {
+      display: inline-block;
+      background: linear-gradient(180deg, #5ea6fa, #4590ef);
+      color: #08111f !important;
+      font-weight: 600;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 9px;
+      text-decoration: none;
+      margin-top: 4px;
+    }
+    .tryit:hover { filter: brightness(1.08); }
+    .keybox {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text);
+      margin: 12px 0;
+      line-height: 1.6;
+    }
+    .probox {
+      background: rgba(217, 122, 43, 0.08);
+      border: 1px solid rgba(217, 122, 43, 0.4);
+      border-left: 3px solid #d97a2b;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--text);
+      margin: 12px 0 4px;
+      line-height: 1.6;
+    }
+    .probox b { color: #e89150; }
+    .toc { columns: 2; font-size: 13px; }
+    .toc a { color: var(--text-dim); text-decoration: none; display: block; padding: 2px 0; }
+    .toc a:hover { color: #d97a2b; }
+    .mini-grid { display: grid; grid-template-columns: repeat(13, 1fr); gap: 1px; max-width: 420px; margin: 0 auto; }
+    .mini-grid .range-cell { font-size: clamp(5px, 1.6vw, 8px); border-radius: 2px; }
+    .grids2 { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; }
+    .grids2 > div { flex: 1 1 300px; max-width: 420px; }
+    .grids2 .glabel { text-align: center; font-size: 12px; color: var(--text-dim); margin: 6px 0; }
+    .ntable { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+    .ntable th, .ntable td { padding: 5px 9px; border-bottom: 1px solid var(--border); text-align: left; font-variant-numeric: tabular-nums; }
+    .ntable th { color: var(--text-dim); font-size: 11px; text-transform: uppercase; }
+    .ntable td { color: var(--text); }
+    .livewrap { overflow-x: auto; }
+    .fboard { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; margin: 8px 0; font-size: 13px; color: var(--text-dim); }
+    @media (max-width: 700px) { .toc { columns: 1; } .gsec { padding: 16px 14px; } }
+  </style>
+</head>
+<body>
+<div class="guide">
+  <p style="margin-top:10px">
+    <a href="index.html" class="btn" style="text-decoration:none">← Trainer</a>
+    <a href="guide.html" class="btn" style="text-decoration:none;margin-left:6px">📖 The Guide (fundamentals)</a>
+  </p>
+  <h1>🎓 The Advanced Guide</h1>
+  <p class="sub">The pro track. The <a href="guide.html" style="color:var(--accent)">fundamentals guide</a> makes you
+    hard to beat; this one is about the concepts that separate winning regulars from everyone else. Every number below
+    is computed live on this page by the same engines that power the trainer. Work through it slowly — one section,
+    then a week of drilling it, then the next. Each section ends with a <b>pro benchmark</b>: an honest bar for what
+    "mastered" means.</p>
+
+  <div class="gsec">
+    <h2>Contents</h2>
+    <div class="toc" id="toc"></div>
+  </div>
+
+  <div class="gsec" id="a1">
+    <h2><span class="num">A1.</span>Combinatorics and blockers</h2>
+    <p>Everything a solver does starts with counting combos. An unpaired hand has <b>16 combos</b> (4 suited + 12
+      offsuit), a pair has <b>6</b>. Board and hole cards remove combos — and that removal, not intuition, is what
+      decides which hands bluff, which call, and which fold.</p>
+    <h3>Card removal in practice — computed live</h3>
+    <div class="fboard" id="blockerDemo">computing…</div>
+    <ul>
+      <li><b>Bluff selection by blockers:</b> A5s is the classic 3-bet bluff not because it's pretty, but because the
+        ace blocks a third of the continuing range's strongest region (AA, AK, AQ). Fewer continues → more folds →
+        cheaper bluff.</li>
+      <li><b>Value blocking (the bad kind):</b> holding KQ on K72 you block KK — good — but when the money goes in on
+        K72-K, your second king blocks exactly the hands you beat that pay you (KJ, KT).</li>
+      <li><b>Unblocking bluffs when you call:</b> the best river bluff-catchers <i>don't</i> block the busted draws
+        villain bluffs with. Holding Q♦J♦ on a board where the ♦ draw missed is a terrible call — you hold their
+        bluffs in your own hand.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> in any spot you can say within 2 seconds how many combos of the top of
+      villain's range exist <i>given your cards and the board</i> — "he has 7 value combos and I beat 2 of them" is
+      the level of resolution real decisions are made at.</div>
+    <p><a class="tryit" href="index.html?mode=explore">Practice → Spot explorer (count combos in any range)</a></p>
+  </div>
+
+  <div class="gsec" id="a2">
+    <h2><span class="num">A2.</span>Range morphology: linear, condensed, polarized</h2>
+    <p>Ranges come in three shapes, and recognizing which shape a bet represents is the fastest read in poker.
+      These two grids are live from the trainer's charts — the BB's response to a BTN open, split into its two
+      personalities:</p>
+    <div class="grids2">
+      <div><div class="glabel"><b>BB 3-bet range</b> — polarized: premiums + blocker bluffs</div><div class="mini-grid range-grid" id="gridPolar"></div></div>
+      <div><div class="glabel"><b>BB calling range</b> — condensed: strong-but-not-premium</div><div class="mini-grid range-grid" id="gridCondensed"></div></div>
+    </div>
+    <ul>
+      <li><b>Linear</b> (top-down: AA→A9s with no gaps) — opening ranges, value-heavy 3-bets vs weak players. Bet
+        when you're simply "strong".</li>
+      <li><b>Polarized</b> (nuts + air, nothing in between) — river bets, light 3-bets. Powerful because the
+        opponent's medium hands face an impossible guess.</li>
+      <li><b>Condensed / capped</b> (all medium, no nuts) — <i>every calling range</i>. This is the exploitable
+        shape: a range that just calls is <b>capped</b> at its best possible holding.</li>
+    </ul>
+    <p><b>Attacking caps</b> is a core pro skill: when the BB just calls preflop and just calls the flop, they almost
+      never hold AA/KK/sets by the turn — big turn and river barrels print against capped ranges, especially on cards
+      that favor <i>your</i> uncapped range (aces, kings, board pairs).</p>
+    <div class="probox"><b>Pro benchmark:</b> after any two actions you can name the shape of both ranges ("my range
+      is uncapped here, his is condensed") and adjust sizing to it without looking anything up.</div>
+    <p><a class="tryit" href="index.html?mode=explore">Practice → build 3-bet lines in the explorer</a></p>
+  </div>
+
+  <div class="gsec" id="a3">
+    <h2><span class="num">A3.</span>Bet sizing theory and geometric growth</h2>
+    <p>Sizing isn't a style choice — each size carries exact math. Two numbers govern all of it, for a bet
+      <b>b</b> into pot <b>P</b>:</p>
+    <div class="keybox">
+      <b>α (alpha)</b> = b ÷ (b + P) — how often a pure bluff must work to break even.<br>
+      <b>Bluff share</b> = b ÷ (P + 2b) — the fraction of a balanced river betting range that is bluffs
+      (equal to the pot odds you offer).
+    </div>
+    <div class="livewrap"><table class="ntable" id="alphaTable"></table></div>
+    <p><b>Geometric sizing</b> answers "what size gets stacks in by the river?" — betting the same pot-fraction
+      <b>e</b> on every street such that the last bet is exactly all-in. Computed live for the trainer's standard
+      single-raised pot:</p>
+    <div class="fboard" id="geoDemo">computing…</div>
+    <p>Why it matters: the geometric line maximizes the amount a worse hand can be charged across three streets.
+      When you hold the nuts on the flop and want maximum value, geometric is the default; deviate <i>smaller</i>
+      early only when you want their whole range to continue.</p>
+    <ul>
+      <li><b>Small (25–40%)</b>: range bets on boards you dominate — taxing their entire range cheaply.</li>
+      <li><b>Large (66–100%)</b>: polar — value that wants a big pot plus the bluffs that support it.</li>
+      <li><b>Overbet (125%+)</b>: reserved for <b>nut advantage</b> — when only your range holds the top hands
+        (their cap, your uncapped). The bluffs alongside must block their calls.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> you can quote α and the bluff share for ⅓, ½, ¾, pot and 1.5x without
+      thinking, and you can compute the geometric size for any SPR in your head to within 10%.</div>
+  </div>
+
+  <div class="gsec" id="a4">
+    <h2><span class="num">A4.</span>Multi-street defense: how alpha compounds</h2>
+    <p>MDF isn't a one-street idea. Facing a ¾-pot barrel on <i>every</i> street, defending the minimum each time
+      means your flop-continuing range survives to showdown only:</p>
+    <div class="fboard" id="mdfCompound">computing…</div>
+    <p>That compounding drives real strategy:</p>
+    <ul>
+      <li><b>Plan three streets at the flop.</b> Before calling, ask: "which turns do I continue on?" If the honest
+        answer is "almost none", folding the flop saves two more bets — calling flop to fold every turn is the most
+        expensive habit in poker.</li>
+      <li><b>Defend with the right composition:</b> your continues need a mix of made hands <i>and</i> draws/backdoors
+        that can become barrels themselves — a calling range of pure bluff-catchers gets ground down street by street.</li>
+      <li><b>The barreler's mirror:</b> your flop bluffs should mostly hold equity to keep barreling (draws,
+        overcards, backdoors). Pure air wants to bluff once or not at all.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> you never call a flop bet without already knowing your turn plan on the
+      three main card classes (blank, overcard, draw-completer).</div>
+    <p><a class="tryit" href="index.html?mode=pfhand">Practice → Play full hands vs the solver</a></p>
+  </div>
+
+  <div class="gsec" id="a5">
+    <h2><span class="num">A5.</span>Advanced ICM: risk premium and bubble factors</h2>
+    <p>The fundamentals guide told you ICM tightens calls. The pro version is quantitative: every confrontation has a
+      <b>risk premium</b> — extra equity you need beyond chip-EV pot odds, because tournament chips lost hurt more than
+      chips won help. The matrix below is computed live by the trainer's Malmuth-Harville engine for a
+      <b>four-player bubble</b> (stacks 40/30/20/10 bb, payouts 50/30/20, three paid):</p>
+    <div class="livewrap"><table class="ntable" id="bubbleMatrix"></table></div>
+    <ul>
+      <li><b>Medium stacks suffer the most.</b> The 30 bb stack needs the biggest edge to fight the 40 bb stack —
+        they have the most ladder equity to lose. The 10 bb stack plays closest to chip-EV: it has little left to
+        protect.</li>
+      <li><b>Coverage is leverage.</b> The chip leader's risk premium <i>against</i> mediums is small while theirs is
+        huge — that asymmetry, not card advantage, is why big stacks attack relentlessly on bubbles.</li>
+      <li><b>Laddering is a real strategy:</b> with a huge pay jump ahead, folding 60%-equity spots can be right.
+        Compute it, don't feel it — the required-equity numbers above are the honest bar.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> before any big all-in near the money you can estimate your risk premium
+      within ~3% — "this is a 50/50 in chips but I need 58% here" — and fold hands that feel unfoldable.</div>
+    <p><a class="tryit" href="index.html?mode=pushfold">Practice → ICM mode + the Bubble ICM scenario</a></p>
+  </div>
+
+  <div class="gsec" id="a6">
+    <h2><span class="num">A6.</span>Multiway pots: why everything tightens</h2>
+    <p>Almost all solver material is heads-up, but tournament pots go multiway constantly — and equity dilutes fast.
+      Live Monte Carlo from this page's evaluator, versus <i>random</i> hands:</p>
+    <div class="livewrap"><table class="ntable" id="mwTable"></table></div>
+    <ul>
+      <li><b>Bluffing collapses.</b> A bluff must fold out <i>everyone</i>. If two players each defend correctly
+        against your size, your bluff succeeds far less often than α requires — the solver's answer is to barely
+        bluff multiway. Value-bet relentlessly instead.</li>
+      <li><b>Value thresholds rise.</b> Top pair good kicker is a three-street value hand heads-up and often a
+        one-street hand three-way. "Someone has it" is real math, not fear.</li>
+      <li><b>Position compounds:</b> being last of three is worth more than last of two — everyone checks to the
+        raiser, and you realize equity free.</li>
+      <li><b>Preflop consequence:</b> with callers likely behind (weak players who never fold), tighten your opens
+        toward hands that flop strong pairs and nut draws, and stop light-3-betting into fields that call everything.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> in a 3-way pot your c-bet frequency drops by roughly half on most
+      textures, and you can articulate <i>why</i> for the specific board.</div>
+  </div>
+
+  <div class="gsec" id="a7">
+    <h2><span class="num">A7.</span>Exploitative play: deviating on purpose</h2>
+    <p>GTO is the baseline; money comes from measured deviation. The math of exploiting is just alpha in reverse —
+      computed live for a ½-pot bluff (α = 33%):</p>
+    <div class="livewrap"><table class="ntable" id="exploitTable"></table></div>
+    <ul>
+      <li><b>Population reads that survive across pools:</b> low/mid-stakes fields under-bluff big rivers (overfold
+        vs their jams), over-fold to turn and river check-raises (raise more value AND more bluffs), over-call flops
+        and give up turns (double-barrel more), and almost never 4-bet bluff (fold to 4-bets).</li>
+      <li><b>Minimum exploitative deviation:</b> shift frequency in the profitable direction without inventing new
+        actions. If they overfold, bluff <i>more of your natural bluff candidates</i> — don't start bluffing hands
+        with showdown value.</li>
+      <li><b>The counter-exploit check:</b> every deviation opens a door. Bluffing every river vs an overfolder is
+        printing until they call once and you realize they've adjusted — date your reads, and re-anchor to baseline
+        against anyone competent or unknown.</li>
+      <li><b>Node-locking mentality:</b> when you study, don't just read the GTO chart — ask "and if villain folds
+        this node 10% too often, what becomes a bet?" That question is where win-rate lives.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> for each regular in your pool you hold 2–3 specific, dated deviations —
+      and you can state what evidence would make you revert each one.</div>
+  </div>
+
+  <div class="gsec" id="a8">
+    <h2><span class="num">A8.</span>Short-stack weapons beyond push/fold</h2>
+    <p>The fundamentals cover jam-or-fold. Pros add three tools around it:</p>
+    <ul>
+      <li><b>The resteal, quantified.</b> Reshoving 18 bb over a 2.2x CO open risks 18 bb to win ~5.2 bb (blinds +
+        antes + the open). Breakeven fold equity with zero pot equity would be ~78% — but you always have equity when
+        called, which is why the solver reshoves A5s (blockers + live cards) long before A9o (dominated when called).
+        Fold equity plus blockers, never "I had an ace".</li>
+      <li><b>Stop-and-go:</b> at 8–12 bb in the blinds, flat the open and jam <i>any flop</i> instead of jamming pre —
+        villain must hit the board to call, so you fold out equity a preflop jam never could. Best with hands that
+        hate being called pre (small pairs, suited connectors).</li>
+      <li><b>The min-raise-fold at 12–16 bb:</b> pure jam-or-fold surrenders the cheap steal. Solvers mix small opens
+        even at these depths from late position, folding to jams with the bottom — it works because your jamming range
+        still exists to protect it. Never min-raise-fold a hand that plays fine as a jam.</li>
+      <li><b>Limping (beyond this trainer's model):</b> at ≤12 bb the SB develops limp ranges in real solves —
+        completing gives the BB a chance to see flops cheap with your whole range protected by limp-jams. Our tree
+        doesn't model limps; know that the pro baseline includes them and study SB limp charts separately.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> between 8 and 20 bb you never feel "card dead" — every orbit you can
+      name which seat you'd attack with which tool, and your reshove ranges shift correctly with the opener's
+      position.</div>
+    <p><a class="tryit" href="index.html?mode=vsopen">Practice → Reshove vs open</a></p>
+  </div>
+
+  <div class="gsec" id="a9">
+    <h2><span class="num">A9.</span>Turn play: equity shifts and barrel selection</h2>
+    <p>The turn is where c-bet autopilot dies. Which card falls changes whose range the board favors — computed live,
+      BTN's opening range vs BB's defend on <b>K♠7♦2♣</b> as five different turns land:</p>
+    <div class="livewrap"><table class="ntable" id="turnTable"></table></div>
+    <ul>
+      <li><b>Barrel range cards, check-back caller cards.</b> Aces and broadways extend your advantage — barrel
+        wide. Middling connectors (8s, 6s, 5s) hit the BB's defend range — slow down with your air.</li>
+      <li><b>Barrel selection within the range:</b> continue with value that grew, draws that grew (added equity),
+        and bluffs holding blockers to their continues. Give up pure air that gained nothing.</li>
+      <li><b>Delayed c-bet:</b> checking back the flop then betting most turns is a real line, not a failure — it
+        realizes equity with medium hands and attacks the BB's "he gave up" probes.</li>
+      <li><b>Facing probes:</b> when the flop checks through, the BB leads many turns; your check-back range must
+        continue with all pairs and good aces or you're folding the best hand constantly.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> shown any flop, you can sort the 47 turn cards into "barrel / mixed /
+      give up" classes in under 30 seconds — and the live table above lets you check yourself.</div>
+    <p><a class="tryit" href="index.html?mode=explore">Practice → walk turns in the postflop explorer</a></p>
+  </div>
+
+  <div class="gsec" id="a10">
+    <h2><span class="num">A10.</span>River mastery: polarization endpoints</h2>
+    <p>The river is pure math wearing a poker face. A balanced betting range holds bluffs in exact proportion to the
+      price offered (the A3 table); everything else is hand-reading through blockers:</p>
+    <ul>
+      <li><b>Value first:</b> list villain's calling range; if it contains more combos you beat than beat you, bet.
+        "Thin value" is just doing this honestly with second pair. Checking back strong-but-not-nutted on scary rivers
+        is discipline, not weakness — being check-raised off the best hand is the true cost.</li>
+      <li><b>Bluff candidates rank by blockers:</b> the best river bluff blocks the calls (their strongest
+        bluff-catchers, e.g. holding the missed nut-flush ace on a paired river) and unblocks the folds. The worst
+        "bluff" is a hand with showdown value — that's burning a free bluff-catcher.</li>
+      <li><b>Calling is combo accounting:</b> against a pot-size jam you need 33%. Count their plausible value combos
+        given your blockers, apply the bluff share their sizing <i>should</i> carry, then adjust for the population
+        read (most under-bluff). The trainer's river drill states its model explicitly — pros do the same silently.</li>
+      <li><b>Raise-size tells at equilibrium don't exist — but in fields they do:</b> small river raises are almost
+        pure value everywhere below high stakes. Fold your bluff-catchers.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> facing a river jam you can narrate: "value combos I lose to: N; combos
+      I beat that jam: M; bluffs needed for a call at this price: X — call/fold" in under a minute.</div>
+    <p><a class="tryit" href="index.html?mode=pfrivercall">Practice → River call vs jam</a></p>
+  </div>
+
+  <div class="gsec" id="a11">
+    <h2><span class="num">A11.</span>Solver literacy: reading mixes and simplifying</h2>
+    <p>Owning solver output means knowing what it does and doesn't say:</p>
+    <ul>
+      <li><b>Mixes are indifference, not indecision.</b> "Bet 30% / check 70%" means both actions have equal EV
+        <i>for that combo</i> — the frequency exists to keep the opponent's counter-strategy from profiting. At the
+        table you may pure-play either side of a mix at almost zero cost; what you may not do is pick the
+        <i>third</i> option the solver never uses.</li>
+      <li><b>EV loss is the only real currency.</b> A "mistake" costing 0.03 bb is noise; the trainer's thresholds
+        (~0.05–0.1 bb) reflect that. Chase the 1 bb+ errors in your recap, ignore frequency-nitpicks.</li>
+      <li><b>Simplify like the pros:</b> one bet size per node (chosen by texture), mixes rounded to 0/50/100, and
+        whole-range strategies ("range-bet this texture class") — measured EV loss of good simplifications is tiny,
+        and execution improves more than equilibrium purity is lost.</li>
+      <li><b>Study aggregates, not hands:</b> the pattern "c-bet 70%+ small on A-high dry, 35% polar on low-connected"
+        transfers; a single solved hand doesn't. The texture quiz and explorer are aggregate tools — use them that
+        way.</li>
+      <li><b>Know your model.</b> This trainer solves single streets with equity rollouts, two bet sizes, one raise
+        size, heads-up. That's ideal for fundamentals and honest about what it isn't. When a line feels off in a
+        deeper tree, that's your cue to check a multi-street solver — not to distrust the concept.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> you can look at any strategy grid in this app and explain <i>why</i>
+      each region mixes — which indifference is being maintained and against what counter-strategy.</div>
+    <p><a class="tryit" href="index.html?mode=explore">Practice → read grids in the explorer</a></p>
+  </div>
+
+  <div class="gsec" id="a12">
+    <h2><span class="num">A12.</span>Variance, bankroll, and actually going pro</h2>
+    <p>The final skill is surviving your own results. MTT variance is brutal in ways cash players never face — this
+      simulation runs live on this page: <b>2,000 careers of 500 tournaments each</b>, played by an identical
+      <i>winning</i> player (~25% ROI, top-heavy payouts):</p>
+    <div class="livewrap"><table class="ntable" id="varTable"></table></div>
+    <ul>
+      <li><b>Read that table again.</b> A genuinely good player loses money over 500-tournament stretches a
+        meaningful fraction of the time. Results tell you almost nothing on samples under a thousand games — EV-loss
+        numbers (like this trainer's) are the only same-day feedback that's real.</li>
+      <li><b>Bankroll:</b> 100 average buy-ins is a floor for serious online MTT play; 200–300+ for a pro with
+        expenses. Shot-take upward with 5–10 buy-ins earmarked, drop back down without ego.</li>
+      <li><b>Volume and game selection beat hero reads:</b> ROI is made by table softness and consistency, not
+        occasional brilliance. The softest field you can beat at your roll is the right field.</li>
+      <li><b>The semi-pro path:</b> keep income stable, put in 15–25 focused hours a week (⅓ study, ⅔ play), review
+        every session's mistakes (the Review button is exactly this), and judge yourself on decision quality per
+        month, not cashes per week.</li>
+    </ul>
+    <div class="probox"><b>Pro benchmark:</b> you can state your ROI confidence interval honestly, your downswing
+      tolerance in buy-ins, and your stop-loss/shot-take rules — written down before you need them.</div>
+    <p><a class="tryit" href="index.html?mode=exam">Measure yourself → Session exam</a></p>
+  </div>
+
+  <div class="gsec">
+    <h2>Where to go from here</h2>
+    <p>Mastery order: <b>A1–A4</b> (the math spine) → <b>A5–A6</b> (tournament-specific) → <b>A7–A10</b> (the
+      money-makers) → <b>A11–A12</b> (the meta-skills). Pair each with its drill until your exam scores hold above
+      90 with postflop spots included. When this page stops teaching you anything new, you've outgrown the trainer's
+      model — graduate to full multi-street solvers and database review, and keep the drills here as your daily
+      warm-up.</p>
+  </div>
+
+  <p style="text-align:center;margin-top:24px">
+    <a href="index.html" class="btn" style="text-decoration:none">← Back to the trainer</a>
+    <a href="guide.html" class="btn" style="text-decoration:none;margin-left:6px">📖 Fundamentals guide</a>
+  </p>
+</div>
+
+<script src="data/equity169.js?v=17"></script>
+<script src="js/constants.js?v=17"></script>
+<script src="js/solver.js?v=17"></script>
+<script src="js/ranges.js?v=17"></script>
+<script src="js/postflop.js?v=17"></script>
+<script>
+(function () {
+  const GTO = globalThis.GTO;
+  const Ranges = globalThis.GTORanges;
+  const PF = globalThis.GTOPostflop;
+  const Solver = globalThis.GTOSolver;
+  const $ = (id) => document.getElementById(id);
+  const RANKS = '23456789TJQKA', SUITS = 'shdc';
+  const C = (s) => (RANKS.indexOf(s[0]) << 2) | SUITS.indexOf(s[1]);
+
+  // table of contents
+  const secs = Array.from(document.querySelectorAll('.gsec[id]'));
+  $('toc').innerHTML = secs.map(s =>
+    `<a href="#${s.id}">${s.querySelector('h2').textContent}</a>`).join('');
+
+  function renderGrid(el, freqs) {
+    let cells = '';
+    for (let id = 0; id < 169; id++) {
+      const f = freqs[id];
+      const label = GTO.handLabel(id);
+      let style = '';
+      const pct = Math.round(f * 100);
+      if (f >= 0.995) style = 'background:var(--jam);color:#fff';
+      else if (f > 0.005) style = `background:linear-gradient(to top, var(--jam) ${pct}%, var(--fold-cell) ${pct}%);color:#dfe6ef`;
+      cells += `<div class="range-cell" style="${style}" title="${label}: ${pct}%">${label}</div>`;
+    }
+    el.innerHTML = cells;
+  }
+
+  // A1: blocker demo — ace combos in BTN's opening range, with and without our ace
+  (function blockers() {
+    const btn = PF.rangeCombos(Ranges.RFI.BTN, []);
+    const total = btn.reduce((s, c) => s + c.w, 0);
+    const aceW = btn.filter(c => (c.c1 >> 2) === 12 || (c.c2 >> 2) === 12).reduce((s, c) => s + c.w, 0);
+    const btnBlocked = PF.rangeCombos(Ranges.RFI.BTN, [C('As'), C('5s')]);
+    const totalB = btnBlocked.reduce((s, c) => s + c.w, 0);
+    const aceWB = btnBlocked.filter(c => (c.c1 >> 2) === 12 || (c.c2 >> 2) === 12).reduce((s, c) => s + c.w, 0);
+    $('blockerDemo').innerHTML =
+      `<span>BTN's opening range: <b>${total.toFixed(0)} combos</b>, ` +
+      `<b>${(100 * aceW / total).toFixed(0)}%</b> contain an ace.</span>` +
+      `<span>You hold <b>A♠5♠</b> → their range shrinks to <b>${totalB.toFixed(0)} combos</b> and only ` +
+      `<b>${(100 * aceWB / totalB).toFixed(0)}%</b> hold an ace — one card removed a quarter of their aces.</span>`;
+  })();
+
+  // A2: polar vs condensed grids
+  renderGrid($('gridPolar'), Ranges.VSRFI.BB_vs_BTN.threebet);
+  renderGrid($('gridCondensed'), Ranges.VSRFI.BB_vs_BTN.call);
+
+  // A3: alpha table + geometric sizing
+  (function alpha() {
+    const sizes = [['⅓ pot', 1 / 3], ['½ pot', 0.5], ['⅔ pot', 2 / 3], ['¾ pot', 0.75], ['Pot', 1], ['1.5x pot', 1.5], ['2x pot', 2]];
+    let html = '<tr><th>Size</th><th>α — bluff must work</th><th>Defender MDF</th><th>River bluff share</th></tr>';
+    for (const [nm, s] of sizes) {
+      html += `<tr><td>${nm}</td><td>${(100 * s / (1 + s)).toFixed(0)}%</td>` +
+        `<td>${(100 / (1 + s)).toFixed(0)}%</td><td>${(100 * s / (1 + 2 * s)).toFixed(0)}%</td></tr>`;
+    }
+    $('alphaTable').innerHTML = html;
+    const P = 5.9, S = 37.8, n = 3;
+    const x = Math.pow((P + 2 * S) / P, 1 / n);
+    const e = (x - 1) / 2;
+    let pot = P, st = S;
+    const line = [];
+    for (let i = 0; i < n; i++) {
+      const b = Math.min(st, e * pot);
+      line.push(b.toFixed(1));
+      pot += 2 * b; st -= b;
+    }
+    $('geoDemo').innerHTML = `<span>Pot <b>${P} bb</b>, stacks <b>${S} bb</b>, three streets → geometric size ` +
+      `<b>${(e * 100).toFixed(0)}% pot</b> each street: bets of <b>${line.join(' → ')} bb</b> put the last chip in ` +
+      `on the river.</span>`;
+  })();
+
+  // A4: compounding MDF
+  (function mdf() {
+    const per = 1 / 1.75; // vs 3/4 pot
+    $('mdfCompound').innerHTML = `<span>MDF vs ¾-pot = <b>${(per * 100).toFixed(0)}%</b> per street → ` +
+      `after three barrels only <b>${(Math.pow(per, 3) * 100).toFixed(0)}%</b> of your flop range remains — ` +
+      `roughly your two-pair-plus and best top pairs. Everything else was scheduled to fold on some street; know
+      which street when you call the first bet.</span>`;
+  })();
+
+  // A5: bubble factor matrix (live Malmuth-Harville)
+  (function bubble() {
+    const stacks = [40, 30, 20, 10];
+    const payouts = [50, 30, 20];
+    const base = Solver.icmEquities(stacks, payouts);
+    let html = '<tr><th>All-in vs →<br>↓ hero</th>' + stacks.map(s => `<th>${s} bb</th>`).join('') + '</tr>';
+    for (let i = 0; i < 4; i++) {
+      html += `<tr><td><b>${stacks[i]} bb</b></td>`;
+      for (let j = 0; j < 4; j++) {
+        if (i === j) { html += '<td>—</td>'; continue; }
+        const risk = Math.min(stacks[i], stacks[j]);
+        const win = stacks.slice(); win[i] += risk; win[j] -= risk;
+        const lose = stacks.slice(); lose[i] -= risk; lose[j] += risk;
+        const eqW = Solver.icmEquities(win, payouts)[i];
+        const eqL = Solver.icmEquities(lose, payouts)[i];
+        const need = (base[i] - eqL) / ((eqW - eqL) || 1);
+        const rp = need * 100 - 50;
+        const col = rp > 8 ? '#f87171' : rp > 4 ? '#fbbf24' : '#34d399';
+        html += `<td>needs <b style="color:${col}">${(need * 100).toFixed(1)}%</b><br>` +
+          `<span style="color:var(--text-dim)">+${rp.toFixed(1)}% premium</span></td>`;
+      }
+      html += '</tr>';
+    }
+    $('bubbleMatrix').innerHTML = html;
+  })();
+
+  // A6: multiway equity dilution (Monte Carlo)
+  (function multiway() {
+    const rnd = PF.makeRng(77);
+    function equityVsN(hand, nOpp, trials) {
+      let win = 0;
+      for (let t = 0; t < trials; t++) {
+        const used = new Uint8Array(52);
+        used[hand[0]] = used[hand[1]] = 1;
+        const opps = [];
+        for (let o = 0; o < nOpp; o++) {
+          const h = [];
+          while (h.length < 2) { const c = (rnd() * 52) | 0; if (!used[c]) { used[c] = 1; h.push(c); } }
+          opps.push(h);
+        }
+        const board = [];
+        while (board.length < 5) { const c = (rnd() * 52) | 0; if (!used[c]) { used[c] = 1; board.push(c); } }
+        const hv = PF.eval7(hand[0], hand[1], ...board);
+        let best = -1, ties = 0;
+        for (const o of opps) {
+          const v = PF.eval7(o[0], o[1], ...board);
+          if (v > best) { best = v; ties = 1; } else if (v === best) ties++;
+        }
+        if (hv > best) win += 1;
+        else if (hv === best) win += 1 / (ties + 1);
+      }
+      return win / trials;
+    }
+    const hands = [['AA', ['As', 'Ad']], ['AKs', ['Ah', 'Kh']], ['87s', ['8c', '7c']]];
+    let html = '<tr><th>Hand</th><th>vs 1</th><th>vs 2</th><th>vs 3 opponents</th></tr>';
+    for (const [nm, hs] of hands) {
+      const h = hs.map(C);
+      html += `<tr><td><b>${nm}</b></td>` + [1, 2, 3].map(n =>
+        `<td>${(equityVsN(h, n, 8000) * 100).toFixed(0)}%</td>`).join('') + '</tr>';
+    }
+    $('mwTable').innerHTML = html;
+  })();
+
+  // A7: exploit EV of a pure 1/2-pot bluff vs fold frequency
+  (function exploit() {
+    const b = 0.5; // half pot, pot = 1
+    let html = '<tr><th>Villain folds</th><th>EV of a pure ½-pot bluff</th><th>Verdict</th></tr>';
+    for (const f of [0.25, 1 / 3, 0.40, 0.50, 0.60]) {
+      const ev = f * 1 - (1 - f) * b;
+      const verdict = Math.abs(f - 1 / 3) < 0.01 ? 'breakeven (this is α)' : ev > 0 ? 'bluff everything' : 'bluff nothing';
+      const col = ev > 0.005 ? '#34d399' : ev < -0.005 ? '#f87171' : '#fbbf24';
+      html += `<tr><td>${(f * 100).toFixed(0)}%</td><td style="color:${col}">${ev >= 0 ? '+' : ''}${ev.toFixed(2)} pots</td><td>${verdict}</td></tr>`;
+    }
+    $('exploitTable').innerHTML = html;
+  })();
+
+  // A9: turn equity shifts on K72r
+  (function turns() {
+    const btn = PF.rangeCombos(Ranges.RFI.BTN, []);
+    const bb = PF.rangeCombos(Ranges.VSRFI.BB_vs_BTN.call, []);
+    const flop = ['Ks', '7d', '2c'].map(C);
+    const flopEq = PF.rangeVsRange(btn, bb, flop, 25000, 4);
+    const turns = [['A♥', 'Ah'], ['Q♠', 'Qs'], ['8♠', '8s'], ['6♥', '6h'], ['2♦', '2d']];
+    let html = `<tr><th>Turn on K♠7♦2♣ (flop: BTN ${(flopEq * 100).toFixed(1)}%)</th><th>BTN range equity</th><th>Shift</th><th>Plan</th></tr>`;
+    for (const [nm, cs] of turns) {
+      const eq = PF.rangeVsRange(btn, bb, flop.concat([C(cs)]), 25000, 4);
+      const d = (eq - flopEq) * 100;
+      const col = d > 0.5 ? '#34d399' : d < -0.5 ? '#f87171' : '#94a3b8';
+      const plan = d > 1 ? 'barrel wide' : d < -1 ? 'slow down' : 'mixed';
+      html += `<tr><td><b>${nm}</b></td><td>${(eq * 100).toFixed(1)}%</td>` +
+        `<td style="color:${col}">${d >= 0 ? '+' : ''}${d.toFixed(1)}%</td><td>${plan}</td></tr>`;
+    }
+    $('turnTable').innerHTML = html;
+  })();
+
+  // A12: variance simulation — 2000 careers x 500 MTTs at ~25% ROI
+  (function variance() {
+    const rnd = PF.makeRng(123);
+    // cash 16% of the time; payout multiples tuned to ~1.256 buyins EV per entry
+    const mults = [[0.60, 2], [0.25, 5], [0.10, 12], [0.045, 60], [0.005, 300]];
+    const N = 500, CAREERS = 2000;
+    const results = [];
+    let loseCount = 0;
+    for (let c = 0; c < CAREERS; c++) {
+      let profit = 0;
+      for (let t = 0; t < N; t++) {
+        profit -= 1;
+        if (rnd() < 0.16) {
+          let r = rnd(), m = 2;
+          for (const [p, mm] of mults) { if (r < p) { m = mm; break; } r -= p; }
+          profit += m;
+        }
+      }
+      results.push(profit);
+      if (profit < 0) loseCount++;
+    }
+    results.sort((a, b) => a - b);
+    const q = (p) => results[Math.floor(p * CAREERS)].toFixed(0);
+    let html = '<tr><th>After 500 tournaments (25% ROI player)</th><th>Buy-ins</th></tr>';
+    html += `<tr><td>Expected (mean) profit</td><td>+${(results.reduce((s, x) => s + x, 0) / CAREERS).toFixed(0)}</td></tr>`;
+    html += `<tr><td>Median career</td><td>${q(0.5)}</td></tr>`;
+    html += `<tr><td>Unlucky (bottom 10%)</td><td style="color:#f87171">${q(0.1)}</td></tr>`;
+    html += `<tr><td>Brutal (bottom 2%)</td><td style="color:#f87171">${q(0.02)}</td></tr>`;
+    html += `<tr><td>Heater (top 10%)</td><td style="color:#34d399">+${q(0.9)}</td></tr>`;
+    html += `<tr><td><b>Chance a winning player is DOWN after 500 games</b></td><td><b>${(100 * loseCount / CAREERS).toFixed(0)}%</b></td></tr>`;
+    $('varTable').innerHTML = html;
+  })();
+})();
+</script>
+</body>
+</html>
