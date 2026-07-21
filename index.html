@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>GTO Trainer — Tournament Poker</title>
-  <link rel="stylesheet" href="css/styles.css?v=15">
+  <link rel="stylesheet" href="css/styles.css?v=16">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♠</text></svg>">
 </head>
 <body>
@@ -116,16 +116,24 @@
         <label>Trainer mode</label>
         <select id="setMode">
           <option value="auto" selected>Auto (by stack depth)</option>
-          <option value="pushfold">Jam / Fold (solver)</option>
-          <option value="callvjam">Call vs Jam (solver)</option>
-          <option value="opentree">Open: raise/jam/fold (solver)</option>
-          <option value="vsopen">Reshove vs open (solver)</option>
-          <option value="vs3bet">Facing a 3-bet jam (solver)</option>
-          <option value="rfi">Opening ranges (charts)</option>
-          <option value="vsrfi">Facing a raise (charts)</option>
-          <option value="builder">Range builder quiz</option>
-          <option value="exam">Session exam (mixed spots, scored)</option>
-          <optgroup label="Postflop (heads-up SRP, 40bb)">
+          <optgroup label="Short stack (≤15 bb)">
+            <option value="pushfold">Jam / Fold (solver)</option>
+            <option value="callvjam">Call vs Jam (solver)</option>
+          </optgroup>
+          <optgroup label="Mid stack (15–30 bb)">
+            <option value="opentree">Open: raise/jam/fold (solver)</option>
+            <option value="vsopen">Reshove vs open (solver)</option>
+            <option value="vs3bet">Facing a 3-bet jam (solver)</option>
+          </optgroup>
+          <optgroup label="Deep stack (40 bb+)">
+            <option value="rfi">Opening ranges (charts)</option>
+            <option value="vsrfi">Facing a raise (charts)</option>
+          </optgroup>
+          <optgroup label="Quizzes & exams">
+            <option value="builder">Range builder quiz</option>
+            <option value="exam">Session exam (mixed spots, scored)</option>
+          </optgroup>
+          <optgroup label="Postflop (heads-up, 40bb)">
             <option value="pfhand">Play a full hand (solver)</option>
             <option value="pfcbet">C-bet flop (solver)</option>
             <option value="pfdefend">Defend vs c-bet (solver)</option>
@@ -238,14 +246,14 @@
     </div>
   </div>
 
-  <script src="data/equity169.js?v=15"></script>
-  <script src="js/constants.js?v=15"></script>
-  <script src="js/solver.js?v=15"></script>
-  <script src="js/ranges.js?v=15"></script>
-  <script src="js/deck.js?v=15"></script>
-  <script src="js/postflop.js?v=15"></script>
-  <script src="js/postflop-solver.js?v=15"></script>
-  <script src="js/main.js?v=15"></script>
+  <script src="data/equity169.js?v=16"></script>
+  <script src="js/constants.js?v=16"></script>
+  <script src="js/solver.js?v=16"></script>
+  <script src="js/ranges.js?v=16"></script>
+  <script src="js/deck.js?v=16"></script>
+  <script src="js/postflop.js?v=16"></script>
+  <script src="js/postflop-solver.js?v=16"></script>
+  <script src="js/main.js?v=16"></script>
   <script>
     // installable PWA + offline support (skipped on file://)
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {

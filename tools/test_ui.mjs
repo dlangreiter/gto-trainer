@@ -362,6 +362,24 @@ await page.click('#btnCloseExam');
 check('nav: 4 section tabs + drill/level menus', await page.evaluate(() =>
   document.querySelectorAll('#sectionTabs .tab').length === 4 &&
   !!document.getElementById('qDrill') && !!document.getElementById('qLevel')));
+
+// two-level preflop picker: depth categories → drills, with auto-depth
+check('preflop: 5 depth-category chips',
+  await page.$$eval('#quickBar .qchip.cat', els => els.length) === 5);
+await page.click('#quickBar .qchip.cat[data-cat="mid"]');
+await waitHand(3);
+check('mid category → open-strategy drill at mid depth',
+  /Open Strategy/i.test(await page.$eval('#tableCenter', el => el.textContent)));
+check('mid category shows its 3 sub-drills',
+  await page.$$eval('#quickBar [data-premode]', els => els.length) === 3);
+await page.click('#quickBar [data-premode="vsopen"]');
+await waitHand(2);
+check('sub-drill switch → reshove vs open',
+  /Reshove/i.test(await page.$eval('#tableCenter', el => el.textContent)));
+await page.click('#quickBar .qchip.cat[data-cat="deep"]');
+await waitHand(2);
+check('deep category auto-sets a deep stack',
+  await page.evaluate(() => parseFloat(JSON.parse(localStorage.getItem('gto_settings')).stacksText) >= 40000));
 const drillCount = await page.$$eval('#qDrill option', els => els.length);
 check('drill menu holds the presets (' + (drillCount - 1) + ')', drillCount >= 7);
 await page.select('#qDrill', '1'); // Short-stack UTG

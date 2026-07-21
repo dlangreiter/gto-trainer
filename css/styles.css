@@ -427,6 +427,28 @@ header h1.exam-live::after {
   color: var(--accent);
   background: rgba(79, 156, 249, 0.1);
 }
+.quick-bar .q-row {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+.quick-bar .qchip.cat { font-weight: 700; }
+.quick-bar .qchip.cat.on {
+  background: linear-gradient(180deg, #5ea6fa, #4590ef);
+  color: #08111f;
+  border-color: transparent;
+}
+.quick-bar .qlabel {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-right: 2px;
+}
 
 .quick-bar .qsel {
   background: var(--panel-2) url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5'><path d='M0 0l4 5 4-5z' fill='%2394a3b8'/></svg>") no-repeat right 11px center;

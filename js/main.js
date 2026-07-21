@@ -186,7 +186,7 @@
   function getWorker() {
     if (worker || workerBroken) return worker;
     try {
-      worker = new Worker('js/solver-worker.js?v=15');
+      worker = new Worker('js/solver-worker.js?v=16');
       worker.onmessage = (e) => {
         const msg = e.data;
         if (msg.type === 'progress') {
@@ -1571,7 +1571,7 @@
   function getPfWorker() {
     if (pfWorker || pfWorkerBroken) return pfWorker;
     try {
-      pfWorker = new Worker('js/postflop-worker.js?v=15');
+      pfWorker = new Worker('js/postflop-worker.js?v=16');
       pfWorker.onmessage = (e) => {
         const msg = e.data;
         if (msg.type === 'progress') $('solveFill').style.width = (msg.frac * 100).toFixed(0) + '%';
@@ -2360,6 +2360,41 @@
 
   const PF_LIST = ['pfhand', 'pfcbet', 'pfdefend', 'pftexture', 'pfequity', 'pfrivercall'];
 
+  // preflop drill taxonomy: spots grouped by stack depth, so picking a drill
+  // also configures a table depth that makes sense for it
+  const PRE_CATS = [
+    { id: 'auto', label: '✨ Auto', modes: ['auto'] },
+    { id: 'short', label: '🔥 Short ≤15bb', modes: ['pushfold', 'callvjam'], stacks: '10000', band: [1, 15] },
+    { id: 'mid', label: '⚔️ Mid 15–30bb', modes: ['opentree', 'vsopen', 'vs3bet'], stacks: '25000', band: [16, 30] },
+    { id: 'deep', label: '🌊 Deep 40bb+', modes: ['rfi', 'vsrfi'], stacks: '50000', band: [40, 9999] },
+    { id: 'quiz', label: '🎨 Range quiz', modes: ['builder'] },
+  ];
+
+  function preCatOf(mode) {
+    return PRE_CATS.find(c => c.modes.includes(mode)) || null;
+  }
+
+  function heroDepthBB() {
+    const first = parseFloat(String(settings.stacksText).split(',')[0]);
+    return isNaN(first) ? 10 : first / Math.max(1, settings.bbChips);
+  }
+
+  function pickPreflopDrill(mode) {
+    const cat = preCatOf(mode);
+    settings.mode = mode;
+    // if the current table depth doesn't fit the drill, move to its home depth
+    if (cat && cat.band) {
+      const d = heroDepthBB();
+      if (d < cat.band[0] || d > cat.band[1]) settings.stacksText = cat.stacks;
+    }
+    saveJson('gto_settings', settings);
+    scenario = null;
+    reviewQueue = null;
+    exam = null;
+    renderNav();
+    newHand();
+  }
+
   function currentSection() {
     if (settings.mode === 'exam') return 'exam';
     if (settings.mode === 'explore') return 'explore';
@@ -2384,9 +2419,13 @@
 
     if (sec === 'postflop') {
       const pt = settings.pfPot === '3bp';
-      $('quickBar').innerHTML = PF_LIST.map(m =>
-        `<button class="qchip${settings.mode === m ? ' on' : ''}" data-pfmode="${m}">${MODE_LABELS[m]}</button>`).join('') +
-        `<button class="qchip" id="qPotType" title="Toggle pot type">⇄ ${pt ? '3-bet pot' : 'Single-raised'}</button>`;
+      const chip = (m) =>
+        `<button class="qchip${settings.mode === m ? ' on' : ''}" data-pfmode="${m}">${MODE_LABELS[m]}</button>`;
+      $('quickBar').innerHTML =
+        `<div class="q-row"><span class="qlabel">Play</span>${chip('pfhand')}` +
+        `<button class="qchip" id="qPotType" title="Toggle pot type">⇄ ${pt ? '3-bet pot' : 'Single-raised'}</button></div>` +
+        `<div class="q-row"><span class="qlabel">Flop</span>${chip('pfcbet')}${chip('pfdefend')}</div>` +
+        `<div class="q-row"><span class="qlabel">Quiz</span>${chip('pftexture')}${chip('pfequity')}${chip('pfrivercall')}</div>`;
       $('qPotType').addEventListener('click', () => {
         settings.pfPot = settings.pfPot === '3bp' ? 'srp' : '3bp';
         saveJson('gto_settings', settings);
@@ -2409,6 +2448,16 @@
       return;
     }
 
+    // two-level picker: depth category → drills within it
+    const activeCat = preCatOf(settings.mode);
+    let bar = `<div class="q-row">` + PRE_CATS.map(c =>
+      `<button class="qchip cat${activeCat && activeCat.id === c.id ? ' on' : ''}" data-cat="${c.id}">${c.label}</button>`).join('') +
+      `</div>`;
+    if (activeCat && activeCat.modes.length > 1) {
+      bar += `<div class="q-row">` + activeCat.modes.map(mm =>
+        `<button class="qchip${settings.mode === mm ? ' on' : ''}" data-premode="${mm}">${MODE_LABELS[mm]}</button>`).join('') +
+        `</div>`;
+    }
     const drillOpts = PRESETS.map((p, i) => i === 0 ? '' :
       `<option value="${i}">${p.label}</option>`).join('');
     const curLevel = LEVELS.findIndex(l =>
@@ -2419,9 +2468,23 @@
       return `<option value="${i}"${i === curLevel ? ' selected' : ''}>` +
         `Level ${i + 1} · ${l.sb}/${l.bb}${l.ante ? ' +ante' : ''} · ${depth} bb deep</option>`;
     }).join('');
-    $('quickBar').innerHTML =
-      `<select class="qsel" id="qDrill"><option value="">⚡ Preflop drills…</option>${drillOpts}</select>` +
-      `<select class="qsel" id="qLevel"><option value="">🕒 Blind level (20-min · 10k)…</option>${levelOpts}</select>`;
+    bar += `<div class="q-row">` +
+      `<select class="qsel" id="qDrill"><option value="">💰 Scenarios…</option>${drillOpts}</select>` +
+      `<select class="qsel" id="qLevel"><option value="">🕒 Blind level (20-min · 10k)…</option>${levelOpts}</select>` +
+      `</div>`;
+    $('quickBar').innerHTML = bar;
+    $('quickBar').querySelectorAll('[data-cat]').forEach(b => {
+      b.addEventListener('click', () => {
+        const cat = PRE_CATS.find(c => c.id === b.dataset.cat);
+        if (activeCat && activeCat.id === cat.id) return; // already there
+        pickPreflopDrill(cat.modes[0]);
+      });
+    });
+    $('quickBar').querySelectorAll('[data-premode]').forEach(b => {
+      b.addEventListener('click', () => {
+        if (settings.mode !== b.dataset.premode) pickPreflopDrill(b.dataset.premode);
+      });
+    });
     $('qDrill').addEventListener('change', () => {
       const i = parseInt($('qDrill').value, 10);
       if (!isNaN(i)) applyPreset(i);
