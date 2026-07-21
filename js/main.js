@@ -186,7 +186,7 @@
   function getWorker() {
     if (worker || workerBroken) return worker;
     try {
-      worker = new Worker('js/solver-worker.js?v=14');
+      worker = new Worker('js/solver-worker.js?v=15');
       worker.onmessage = (e) => {
         const msg = e.data;
         if (msg.type === 'progress') {
@@ -1571,7 +1571,7 @@
   function getPfWorker() {
     if (pfWorker || pfWorkerBroken) return pfWorker;
     try {
-      pfWorker = new Worker('js/postflop-worker.js?v=14');
+      pfWorker = new Worker('js/postflop-worker.js?v=15');
       pfWorker.onmessage = (e) => {
         const msg = e.data;
         if (msg.type === 'progress') $('solveFill').style.width = (msg.frac * 100).toFixed(0) + '%';
@@ -2770,10 +2770,13 @@
   // street is re-solved with Bayes-updated ranges (same engine as the
   // full-hand drill). The chart shows the acting player's strategy mix.
   function parseCards(txt, need) {
-    const toks = String(txt || '').toUpperCase().match(/([2-9TJQKA])\s*([SHDC])/g);
+    // accept letter suits (Ks 7d 2c) and symbol suits (K♠ 7♦ 2♣)
+    const norm = String(txt || '').toUpperCase()
+      .replace(/♠/g, 'S').replace(/♥/g, 'H').replace(/♦/g, 'D').replace(/♣/g, 'C');
+    const toks = norm.match(/(10|[2-9TJQKA])\s*([SHDC])/g);
     if (!toks) return null;
     const cards = toks.map(t => {
-      const c = t.replace(/\s+/g, '');
+      const c = t.replace(/\s+/g, '').replace(/^10/, 'T');
       return (GTO.RANKS.indexOf(c[0]) << 2) | 'SHDC'.indexOf(c[1]);
     });
     if (need && cards.length !== need) return null;
@@ -2781,6 +2784,8 @@
     return cards;
   }
   function cardTxt(c) { return GTO.RANKS[c >> 2] + GTO.SUIT_CHARS[c & 3]; }
+  // letter notation for input fields — must round-trip through parseCards
+  function cardInTxt(c) { return GTO.RANKS[c >> 2] + 'shdc'[c & 3]; }
 
   function xpfBayes(list, strat, stride, idx) {
     return list.map((c, i) => ({ c1: c.c1, c2: c.c2, cls: c.cls, w: c.w * strat[i * stride + idx] }));
@@ -2922,7 +2927,7 @@
       saveExplorer(); renderExplorer();
     });
     $('xpfRandom').addEventListener('click', () => {
-      explorer.pfBoardText = PF.dealBoard(3, []).map(cardTxt).join(' ');
+      explorer.pfBoardText = PF.dealBoard(3, []).map(cardInTxt).join(' ');
       explorer.pfStreets = [{ acts: [] }];
       saveExplorer(); renderExplorer();
     });

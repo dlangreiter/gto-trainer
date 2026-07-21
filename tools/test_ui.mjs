@@ -603,6 +603,16 @@ check('explorer: reset returns to first-in chart', true);
 
 // postflop explorer: fixed flop → c-bet chart → bet → BB response → call → turn
 await page.click('#xSub button[data-v="post"]');
+// regression: the 🎲 random-flop button must produce a parseable board
+await page.click('#xpfRandom');
+await page.waitForFunction(() => document.querySelectorAll('#xGrid .range-cell').length === 169 &&
+  /strategy/.test(document.getElementById('xTitle').textContent), { timeout: 120000 });
+check('pf explorer: random flop parses and solves', true);
+// symbol-suit input must parse too (what mobile users paste/see)
+await page.$eval('#xpfFlop', el => { el.value = 'K♠ 7♦ 2♣'; el.dispatchEvent(new Event('change')); });
+await page.waitForFunction(() => /K♠ 7♦ 2♣/.test(document.getElementById('xTitle').textContent) &&
+  document.querySelectorAll('#xGrid .range-cell').length === 169, { timeout: 120000 });
+check('pf explorer: symbol-suit flop input parses', true);
 await page.$eval('#xpfFlop', el => { el.value = 'Ks 7d 2c'; el.dispatchEvent(new Event('change')); });
 await page.waitForFunction(() => document.querySelectorAll('#xGrid .range-cell').length === 169 &&
   /strategy/.test(document.getElementById('xTitle').textContent), { timeout: 120000 });

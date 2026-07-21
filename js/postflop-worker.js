@@ -1,5 +1,5 @@
 // Web Worker: runs the flop solver off the main thread.
-importScripts('postflop.js?v=14', 'postflop-solver.js?v=14');
+importScripts('postflop.js?v=15', 'postflop-solver.js?v=15');
 
 self.onmessage = function (e) {
   const cfg = e.data;
