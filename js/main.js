@@ -187,7 +187,7 @@
   function getWorker() {
     if (worker || workerBroken) return worker;
     try {
-      worker = new Worker('js/solver-worker.js?v=19');
+      worker = new Worker('js/solver-worker.js?v=20');
       worker.onmessage = (e) => {
         const msg = e.data;
         if (msg.type === 'progress') {
@@ -1572,7 +1572,7 @@
   function getPfWorker() {
     if (pfWorker || pfWorkerBroken) return pfWorker;
     try {
-      pfWorker = new Worker('js/postflop-worker.js?v=19');
+      pfWorker = new Worker('js/postflop-worker.js?v=20');
       pfWorker.onmessage = (e) => {
         const msg = e.data;
         if (msg.type === 'progress') $('solveFill').style.width = (msg.frac * 100).toFixed(0) + '%';

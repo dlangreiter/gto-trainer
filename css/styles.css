@@ -19,6 +19,13 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  /* iOS Safari: don't inflate text (breaks row widths) and never pan the page sideways */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  overflow-x: hidden;
+}
+
 body {
   background:
     radial-gradient(1100px 520px at 50% -12%, #141c2a 0%, rgba(20, 28, 42, 0) 70%),
@@ -26,8 +33,12 @@ body {
   color: var(--text);
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
   min-height: 100vh;
+  max-width: 100vw;
+  overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
 }
+
+input, select { max-width: 100%; }
 
 button { font-family: inherit; touch-action: manipulation; }
 
@@ -920,19 +931,16 @@ header h1.exam-live::after {
   header h1 { font-size: 17px; }
   .section-tabs { padding-bottom: 10px; }
   .section-tabs .tab { flex: 1 1 0; padding: 9px 8px; }
-  /* too many header buttons for one phone row — one swipeable strip, no page overflow */
+  /* too many header buttons for one phone row — wrap into compact rows, never widen the page */
   .header-btns {
     order: 3;
     width: 100%;
     margin-left: 0;
-    gap: 6px;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
+    gap: 5px;
+    flex-wrap: wrap;
+    min-width: 0;
   }
-  .header-btns::-webkit-scrollbar { display: none; }
-  .header-btns .btn { flex: 0 0 auto; white-space: nowrap; padding: 6px 10px; font-size: 12px; }
+  .header-btns .btn { flex: 0 1 auto; white-space: nowrap; padding: 6px 9px; font-size: 12px; }
   .header-stats {
     order: 4;
     width: 100%;

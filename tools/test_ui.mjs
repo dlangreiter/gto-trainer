@@ -859,12 +859,11 @@ await page.waitForFunction(() => document.querySelectorAll('#controls button').l
   document.getElementById('solveOverlay').classList.contains('show'), { timeout: 120000 });
 check('phone width: no horizontal page overflow', await page.evaluate(() =>
   document.documentElement.scrollWidth <= document.documentElement.clientWidth));
-check('phone width: header strip scrolls to reach Settings', await page.evaluate(() => {
-  const strip = document.querySelector('.header-btns');
-  strip.scrollLeft = 9999;
-  const b = document.getElementById('btnSettings').getBoundingClientRect();
-  return b.width > 0 && b.right <= window.innerWidth + 1;
-}));
+check('phone width: every header button fully visible', await page.evaluate(() =>
+  [...document.querySelectorAll('.header-btns .btn')].every(b => {
+    const r = b.getBoundingClientRect();
+    return b.offsetParent === null || (r.left >= -1 && r.right <= window.innerWidth + 1);
+  })));
 await page.setViewport({ width: 1280, height: 950 });
 await page.reload({ waitUntil: 'networkidle0' });
 await page.waitForFunction(() => document.querySelectorAll('#controls button').length >= 2 ||
