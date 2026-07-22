@@ -9,7 +9,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>GTO Trainer — Tournament Poker</title>
-  <link rel="stylesheet" href="css/styles.css?v=17">
+  <link rel="stylesheet" href="css/styles.css?v=18">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>♠</text></svg>">
 </head>
 <body>
@@ -21,6 +21,7 @@
         <button class="btn" id="btnReview" style="display:none;border-color:var(--red);color:var(--red)">Review</button>
         <a class="btn" id="btnGuide" href="guide.html" style="text-decoration:none">📖 Guide</a>
         <a class="btn" id="btnAdvanced" href="advanced.html" style="text-decoration:none;border-color:#d97a2b;color:#e89150">🎓 Advanced</a>
+        <button class="btn" id="btnSessions">💵 Sessions</button>
         <button class="btn" id="btnStats">Stats</button>
         <button class="btn" id="btnRanges">Ranges</button>
         <button class="btn" id="btnSettings">Settings</button>
@@ -238,6 +239,53 @@
     </div>
   </div>
 
+  <!-- Tournament session tracker modal -->
+  <div class="modal-backdrop" id="sessModal">
+    <div class="modal sess-modal">
+      <h2>💵 Session tracker</h2>
+      <div id="sessSummary"></div>
+      <div id="sessChart"></div>
+      <h3 id="sessFormTitle" style="margin:14px 0 8px">Log a session</h3>
+      <div class="row">
+        <label>Date</label>
+        <input type="date" id="sessDate">
+      </div>
+      <div class="row">
+        <label>Venue</label>
+        <input type="text" class="wide" id="sessVenue" placeholder="e.g. The Star, GGPoker, home game">
+      </div>
+      <div class="row">
+        <label>Event / GTD</label>
+        <input type="text" class="wide" id="sessGtd" placeholder="e.g. Friday $10K GTD">
+      </div>
+      <div class="row">
+        <label>Buy-in ($)</label>
+        <input type="number" id="sessBuyin" min="0" step="any" style="width:105px" placeholder="0">
+        <label style="min-width:0">Cashout ($)</label>
+        <input type="number" id="sessCashout" min="0" step="any" style="width:105px" placeholder="0">
+      </div>
+      <div class="hint">Buy-in: total spent incl. re-entries and add-ons. Cashout: prize money plus bounties collected.</div>
+      <div class="row">
+        <label>Place</label>
+        <input type="text" id="sessPlace" style="width:130px" placeholder="e.g. 3 / 142">
+      </div>
+      <div class="row">
+        <label>Knockouts / notes</label>
+        <input type="text" class="wide" id="sessNotes" placeholder="e.g. 2 KOs · busted AKs&lt;QQ on bubble">
+      </div>
+      <div class="modal-btns" style="justify-content:flex-start;margin-top:6px">
+        <button class="btn primary" id="btnSessSave">Add session</button>
+        <button class="btn" id="btnSessCancel" style="display:none">Cancel edit</button>
+      </div>
+      <h3 style="margin:16px 0 8px">History</h3>
+      <div id="sessList"></div>
+      <div class="modal-btns">
+        <button class="btn" id="btnSessExport">Export CSV</button>
+        <button class="btn primary" id="btnCloseSess">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Stats / leaks modal -->
   <div class="modal-backdrop" id="statsModal">
     <div class="modal">
@@ -247,14 +295,14 @@
     </div>
   </div>
 
-  <script src="data/equity169.js?v=17"></script>
-  <script src="js/constants.js?v=17"></script>
-  <script src="js/solver.js?v=17"></script>
-  <script src="js/ranges.js?v=17"></script>
-  <script src="js/deck.js?v=17"></script>
-  <script src="js/postflop.js?v=17"></script>
-  <script src="js/postflop-solver.js?v=17"></script>
-  <script src="js/main.js?v=17"></script>
+  <script src="data/equity169.js?v=18"></script>
+  <script src="js/constants.js?v=18"></script>
+  <script src="js/solver.js?v=18"></script>
+  <script src="js/ranges.js?v=18"></script>
+  <script src="js/deck.js?v=18"></script>
+  <script src="js/postflop.js?v=18"></script>
+  <script src="js/postflop-solver.js?v=18"></script>
+  <script src="js/main.js?v=18"></script>
   <script>
     // installable PWA + offline support (skipped on file://)
     if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {

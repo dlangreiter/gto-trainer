@@ -802,6 +802,56 @@ await applySettings(async () => {
 });
 await waitHand(2);
 
+// --- session tracker (bankroll) ---
+await page.click('#btnSessions');
+await page.waitForSelector('#sessModal.show');
+check('sessions modal opens with empty state',
+  /No sessions logged/.test(await page.$eval('#sessList', el => el.textContent)));
+await page.$eval('#sessVenue', el => el.value = 'The Star');
+await page.$eval('#sessGtd', el => el.value = '$20K GTD');
+await page.$eval('#sessBuyin', el => el.value = '150');
+await page.$eval('#sessCashout', el => el.value = '480');
+await page.$eval('#sessPlace', el => el.value = '3 / 142');
+await page.$eval('#sessNotes', el => el.value = '2 KOs, won flip vs AK');
+await page.click('#btnSessSave');
+const sRow = await page.$eval('#sessList', el => el.textContent);
+check('session logged with all fields',
+  /The Star/.test(sRow) && /\$20K GTD/.test(sRow) && /3 \/ 142/.test(sRow) && /2 KOs/.test(sRow));
+const sSum = await page.$eval('#sessSummary', el => el.textContent);
+check('summary shows net +$330 and ROI +220%', /\+\$330/.test(sSum) && /\+220%/.test(sSum));
+// a losing session on an earlier date
+await page.$eval('#sessDate', el => el.value = '2026-07-10');
+await page.$eval('#sessVenue', el => el.value = 'GGPoker');
+await page.$eval('#sessBuyin', el => el.value = '100');
+await page.click('#btnSessSave');
+const sSum2 = await page.$eval('#sessSummary', el => el.textContent);
+check('two sessions: net +$230, ITM 50%', /\+\$230/.test(sSum2) && /50%/.test(sSum2));
+check('bankroll chart renders (2 bars + line)',
+  await page.$$eval('#sessChart rect', els => els.length) === 2 &&
+  await page.$$eval('#sessChart path', els => els.length) === 1);
+// edit the losing session (older date -> listed second)
+await page.click('#sessList .sess-row:nth-child(2) button[data-act="edit"]');
+check('edit prefills the form',
+  await page.$eval('#sessBuyin', el => el.value) === '100' &&
+  /Save changes/.test(await page.$eval('#btnSessSave', el => el.textContent)));
+await page.$eval('#sessCashout', el => el.value = '50');
+await page.click('#btnSessSave');
+check('edit updates the totals (+$280)',
+  /\+\$280/.test(await page.$eval('#sessSummary', el => el.textContent)));
+// two-tap delete (no browser confirm dialog)
+await page.click('#sessList .sess-row:nth-child(1) button[data-act="del"]');
+check('delete arms first ("Sure?")',
+  /Sure\?/.test(await page.$eval('#sessList .sess-row:nth-child(1)', el => el.textContent)) &&
+  await page.$$eval('#sessList .sess-row', els => els.length) === 2);
+await page.click('#sessList .sess-row:nth-child(1) button[data-act="del"]');
+check('second tap deletes the session',
+  await page.$$eval('#sessList .sess-row', els => els.length) === 1);
+const sStore = await page.evaluate(() => JSON.parse(localStorage.getItem('gto_sessions')).items);
+check('sessions persist to localStorage',
+  sStore.length === 1 && sStore[0].venue === 'GGPoker' && sStore[0].cashout === 50);
+await page.click('#btnCloseSess');
+await page.evaluate(() => localStorage.removeItem('gto_sessions')); // leave storage clean
+
 // --- PWA plumbing ---
 check('manifest linked', await page.evaluate(() =>
   !!document.querySelector('link[rel="manifest"]')));

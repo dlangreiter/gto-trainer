@@ -1,23 +1,23 @@
 // Service worker: precache the app shell, then cache-first for static assets
 // and network-first for page navigations (so new releases land on reload).
 // BUMP CACHE_V whenever the asset ?v= version changes.
-const CACHE_V = 'gto-v17';
+const CACHE_V = 'gto-v18';
 const PRECACHE = [
   '.',
   'index.html',
   'guide.html',
   'advanced.html',
-  'css/styles.css?v=17',
-  'data/equity169.js?v=17',
-  'js/constants.js?v=17',
-  'js/solver.js?v=17',
-  'js/ranges.js?v=17',
-  'js/deck.js?v=17',
-  'js/postflop.js?v=17',
-  'js/postflop-solver.js?v=17',
-  'js/main.js?v=17',
-  'js/solver-worker.js?v=17',
-  'js/postflop-worker.js?v=17',
+  'css/styles.css?v=18',
+  'data/equity169.js?v=18',
+  'js/constants.js?v=18',
+  'js/solver.js?v=18',
+  'js/ranges.js?v=18',
+  'js/deck.js?v=18',
+  'js/postflop.js?v=18',
+  'js/postflop-solver.js?v=18',
+  'js/main.js?v=18',
+  'js/solver-worker.js?v=18',
+  'js/postflop-worker.js?v=18',
   'manifest.webmanifest',
   'icons/icon-192.png',
   'icons/icon-512.png',

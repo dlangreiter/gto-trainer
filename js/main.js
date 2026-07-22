@@ -98,6 +98,7 @@
   let stats = loadJson('gto_stats', { hands: 0, correct: 0, wrong: 0, evLost: 0, evLostIcm: 0 });
   let history = loadJson('gto_history', { items: [] }).items || [];
   let handLog = loadJson('gto_log', { items: [] }).items || [];
+  let sessions = loadJson('gto_sessions', { items: [] }).items || [];
 
   function saveStats() {
     saveJson('gto_stats', stats);
@@ -186,7 +187,7 @@
   function getWorker() {
     if (worker || workerBroken) return worker;
     try {
-      worker = new Worker('js/solver-worker.js?v=17');
+      worker = new Worker('js/solver-worker.js?v=18');
       worker.onmessage = (e) => {
         const msg = e.data;
         if (msg.type === 'progress') {
@@ -1571,7 +1572,7 @@
   function getPfWorker() {
     if (pfWorker || pfWorkerBroken) return pfWorker;
     try {
-      pfWorker = new Worker('js/postflop-worker.js?v=17');
+      pfWorker = new Worker('js/postflop-worker.js?v=18');
       pfWorker.onmessage = (e) => {
         const msg = e.data;
         if (msg.type === 'progress') $('solveFill').style.width = (msg.frac * 100).toFixed(0) + '%';
@@ -3330,6 +3331,164 @@
     $('statsModal').classList.add('show');
   }
 
+  // ---------------- tournament session tracker ----------------
+  // entries: {id, date 'YYYY-MM-DD', venue, gtd, buyin, cashout, place, notes}
+  let sessEditId = null;
+
+  function saveSessions() { saveJson('gto_sessions', { items: sessions }); }
+  const sessEsc = (s) => String(s ?? '').replace(/[&<>"']/g,
+    c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtMoney = (x) => (x < 0 ? '−$' : '$') +
+    Math.abs(x).toLocaleString(undefined, { maximumFractionDigits: 2 });
+  const sessSorted = () => [...sessions].sort((a, b) =>
+    a.date < b.date ? -1 : a.date > b.date ? 1 : a.id - b.id);
+
+  function fmtSessDate(iso) {
+    const d = new Date(iso + 'T12:00:00');
+    return isNaN(d) ? iso : d.toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: '2-digit' });
+  }
+
+  function sessSummaryHtml() {
+    const buy = sessions.reduce((s, e) => s + e.buyin, 0);
+    const cash = sessions.reduce((s, e) => s + e.cashout, 0);
+    const net = cash - buy;
+    const itm = sessions.filter(e => e.cashout > 0).length;
+    const tile = (v, k, cls) => `<div class="tile"><div class="v ${cls || ''}">${v}</div><div class="k">${k}</div></div>`;
+    return '<div class="sess-sum">' +
+      tile(sessions.length, 'sessions') +
+      tile(fmtMoney(buy), 'buy-ins') +
+      tile(fmtMoney(cash), 'cashouts') +
+      tile((net > 0 ? '+' : '') + fmtMoney(net), 'net', net > 0 ? 'pos' : net < 0 ? 'neg' : '') +
+      tile(buy > 0 ? ((net >= 0 ? '+' : '') + (100 * net / buy).toFixed(0) + '%') : '—', 'roi', net > 0 ? 'pos' : net < 0 ? 'neg' : '') +
+      tile(sessions.length ? (100 * itm / sessions.length).toFixed(0) + '%' : '—', 'in the money') +
+      '</div>';
+  }
+
+  // cumulative-profit chart: per-session net bars + running total line
+  function sessChartHtml() {
+    const list = sessSorted().slice(-30);
+    if (list.length < 2) return '';
+    const w = 480, h = 140, pad = 14, base = h - 22;
+    let cum = 0;
+    const pts = list.map(e => ({ e, net: e.cashout - e.buyin, cum: (cum += e.cashout - e.buyin) }));
+    const lo = Math.min(0, ...pts.map(p => p.cum), ...pts.map(p => p.net));
+    const hi = Math.max(1, ...pts.map(p => p.cum), ...pts.map(p => p.net));
+    const y = (v) => base - (v - lo) / (hi - lo) * (base - 12);
+    const bw = (w - pad * 2) / list.length;
+    let bars = '', line = '';
+    pts.forEach((p, i) => {
+      const x = pad + i * bw + 2;
+      const y0 = y(0), y1 = y(p.net);
+      bars += `<rect x="${x.toFixed(1)}" y="${Math.min(y0, y1).toFixed(1)}" width="${Math.max(2, bw - 4).toFixed(1)}" height="${Math.max(1.5, Math.abs(y0 - y1)).toFixed(1)}" rx="2" fill="${p.net >= 0 ? '#34d399' : '#f87171'}" opacity="0.55"><title>${fmtSessDate(p.e.date)} ${sessEsc(p.e.venue)}: ${(p.net >= 0 ? '+' : '') + fmtMoney(p.net)} (total ${(p.cum >= 0 ? '+' : '') + fmtMoney(p.cum)})</title></rect>`;
+      line += `${i ? 'L' : 'M'}${(x + bw / 2 - 2).toFixed(1)},${y(p.cum).toFixed(1)}`;
+    });
+    const zero = `<line x1="${pad}" y1="${y(0).toFixed(1)}" x2="${w - pad}" y2="${y(0).toFixed(1)}" stroke="#7b8798" stroke-width="0.6" stroke-dasharray="3 3"/>`;
+    return '<h3 style="margin:12px 0 4px">Bankroll (per-session net + running total)</h3>' +
+      `<svg viewBox="0 0 ${w} ${h}" style="width:100%;max-width:560px;display:block">${zero}${bars}` +
+      `<path d="${line}" fill="none" stroke="#4f9cf9" stroke-width="2"/></svg>`;
+  }
+
+  function sessListHtml() {
+    const list = sessSorted().reverse();
+    if (!list.length) return '<p style="color:var(--text-dim);margin:4px 0">No sessions logged yet — add your first one above.</p>';
+    return list.map(e => {
+      const net = e.cashout - e.buyin;
+      return `<div class="sess-row" data-sid="${e.id}">
+        <div class="sess-l1"><b>${sessEsc(e.venue) || 'Session'}</b>${e.gtd ? ` <span class="sess-gtd">${sessEsc(e.gtd)}</span>` : ''}<span class="sess-date">${fmtSessDate(e.date)}</span></div>
+        <div class="sess-l2"><span>In ${fmtMoney(e.buyin)}</span><span>Out ${fmtMoney(e.cashout)}</span><span class="${net > 0 ? 'pos' : net < 0 ? 'neg' : ''}">${(net > 0 ? '+' : '') + fmtMoney(net)}</span>${e.place ? `<span>🏁 ${sessEsc(e.place)}</span>` : ''}
+          <span class="sess-acts"><button class="btn mini" data-act="edit">✏️</button><button class="btn mini" data-act="del">🗑️</button></span></div>
+        ${e.notes ? `<div class="sess-notes">${sessEsc(e.notes)}</div>` : ''}
+      </div>`;
+    }).join('');
+  }
+
+  function renderSessions() {
+    $('sessSummary').innerHTML = sessSummaryHtml();
+    $('sessChart').innerHTML = sessChartHtml();
+    $('sessList').innerHTML = sessListHtml();
+  }
+
+  function resetSessForm() {
+    sessEditId = null;
+    const d = new Date();
+    $('sessDate').value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    for (const id of ['sessVenue', 'sessGtd', 'sessBuyin', 'sessCashout', 'sessPlace', 'sessNotes']) $(id).value = '';
+    $('sessFormTitle').textContent = 'Log a session';
+    $('btnSessSave').textContent = 'Add session';
+    $('btnSessCancel').style.display = 'none';
+  }
+
+  function openSessions() {
+    resetSessForm();
+    renderSessions();
+    $('sessModal').classList.add('show');
+  }
+
+  function saveSessionForm() {
+    const entry = {
+      id: sessEditId ?? Date.now(),
+      date: $('sessDate').value || new Date().toISOString().slice(0, 10),
+      venue: $('sessVenue').value.trim(),
+      gtd: $('sessGtd').value.trim(),
+      buyin: Math.max(0, parseFloat($('sessBuyin').value) || 0),
+      cashout: Math.max(0, parseFloat($('sessCashout').value) || 0),
+      place: $('sessPlace').value.trim(),
+      notes: $('sessNotes').value.trim(),
+    };
+    if (!entry.venue && !entry.gtd && !entry.buyin && !entry.cashout) return; // nothing to log
+    const i = sessions.findIndex(e => e.id === sessEditId);
+    if (i >= 0) sessions[i] = entry; else sessions.push(entry);
+    saveSessions();
+    resetSessForm();
+    renderSessions();
+  }
+
+  function sessListClick(ev) {
+    const btn = ev.target.closest('button[data-act]');
+    if (!btn) return;
+    const row = btn.closest('.sess-row');
+    const id = Number(row.dataset.sid);
+    const e = sessions.find(s => s.id === id);
+    if (!e) return;
+    if (btn.dataset.act === 'edit') {
+      sessEditId = id;
+      $('sessDate').value = e.date;
+      $('sessVenue').value = e.venue;
+      $('sessGtd').value = e.gtd;
+      $('sessBuyin').value = e.buyin || '';
+      $('sessCashout').value = e.cashout || '';
+      $('sessPlace').value = e.place;
+      $('sessNotes').value = e.notes;
+      $('sessFormTitle').textContent = `Editing — ${e.venue || fmtSessDate(e.date)}`;
+      $('btnSessSave').textContent = 'Save changes';
+      $('btnSessCancel').style.display = '';
+      $('sessModal').querySelector('.modal').scrollTop = 0;
+    } else if (btn.dataset.act === 'del') {
+      if (btn.dataset.armed) { // two-tap delete, no browser confirm dialog
+        sessions = sessions.filter(s => s.id !== id);
+        saveSessions();
+        if (sessEditId === id) resetSessForm();
+        renderSessions();
+      } else {
+        btn.dataset.armed = '1';
+        btn.textContent = 'Sure?';
+        setTimeout(() => { if (btn.isConnected) { delete btn.dataset.armed; btn.textContent = '🗑️'; } }, 2500);
+      }
+    }
+  }
+
+  function exportSessionsCsv() {
+    const q = (v) => '"' + String(v ?? '').replace(/"/g, '""') + '"';
+    const rows = [['date', 'venue', 'event_gtd', 'buyin', 'cashout', 'net', 'place', 'notes']];
+    for (const e of sessSorted()) rows.push([e.date, e.venue, e.gtd, e.buyin, e.cashout, e.cashout - e.buyin, e.place, e.notes]);
+    const blob = new Blob([rows.map(r => r.map(q).join(',')).join('\r\n')], { type: 'text/csv' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'poker-sessions.csv';
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  }
+
   // ---------------- wiring ----------------
   $('btnSettings').addEventListener('click', openSettings);
   $('btnApplySettings').addEventListener('click', applySettings);
@@ -3376,6 +3535,15 @@
     if (e.target === $('rangeModal')) $('rangeModal').classList.remove('show');
   });
   $('btnStats').addEventListener('click', openStats);
+  $('btnSessions').addEventListener('click', openSessions);
+  $('btnCloseSess').addEventListener('click', () => $('sessModal').classList.remove('show'));
+  $('sessModal').addEventListener('click', (e) => {
+    if (e.target === $('sessModal')) $('sessModal').classList.remove('show');
+  });
+  $('btnSessSave').addEventListener('click', saveSessionForm);
+  $('btnSessCancel').addEventListener('click', resetSessForm);
+  $('btnSessExport').addEventListener('click', exportSessionsCsv);
+  $('sessList').addEventListener('click', sessListClick);
   $('btnCloseStats').addEventListener('click', () => $('statsModal').classList.remove('show'));
   $('statsModal').addEventListener('click', (e) => {
     if (e.target === $('statsModal')) $('statsModal').classList.remove('show');
