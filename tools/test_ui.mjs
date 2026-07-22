@@ -852,6 +852,24 @@ check('sessions persist to localStorage',
 await page.click('#btnCloseSess');
 await page.evaluate(() => localStorage.removeItem('gto_sessions')); // leave storage clean
 
+// --- mobile layout: 7 header buttons must not widen the page ---
+await page.setViewport({ width: 390, height: 844 });
+await page.reload({ waitUntil: 'networkidle0' });
+await page.waitForFunction(() => document.querySelectorAll('#controls button').length >= 2 ||
+  document.getElementById('solveOverlay').classList.contains('show'), { timeout: 120000 });
+check('phone width: no horizontal page overflow', await page.evaluate(() =>
+  document.documentElement.scrollWidth <= document.documentElement.clientWidth));
+check('phone width: header strip scrolls to reach Settings', await page.evaluate(() => {
+  const strip = document.querySelector('.header-btns');
+  strip.scrollLeft = 9999;
+  const b = document.getElementById('btnSettings').getBoundingClientRect();
+  return b.width > 0 && b.right <= window.innerWidth + 1;
+}));
+await page.setViewport({ width: 1280, height: 950 });
+await page.reload({ waitUntil: 'networkidle0' });
+await page.waitForFunction(() => document.querySelectorAll('#controls button').length >= 2 ||
+  document.getElementById('solveOverlay').classList.contains('show'), { timeout: 120000 });
+
 // --- PWA plumbing ---
 check('manifest linked', await page.evaluate(() =>
   !!document.querySelector('link[rel="manifest"]')));

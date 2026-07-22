@@ -920,8 +920,19 @@ header h1.exam-live::after {
   header h1 { font-size: 17px; }
   .section-tabs { padding-bottom: 10px; }
   .section-tabs .tab { flex: 1 1 0; padding: 9px 8px; }
-  .header-btns { margin-left: auto; gap: 6px; }
-  .header-btns .btn { padding: 6px 9px; font-size: 12px; }
+  /* too many header buttons for one phone row — one swipeable strip, no page overflow */
+  .header-btns {
+    order: 3;
+    width: 100%;
+    margin-left: 0;
+    gap: 6px;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .header-btns::-webkit-scrollbar { display: none; }
+  .header-btns .btn { flex: 0 0 auto; white-space: nowrap; padding: 6px 10px; font-size: 12px; }
   .header-stats {
     order: 4;
     width: 100%;
